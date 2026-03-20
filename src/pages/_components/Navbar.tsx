@@ -14,15 +14,15 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
+    <nav className="sticky top-0 z-50 bg-[oklch(0.30_0.12_250/0.55)] backdrop-blur-xl border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <a href="#начало" className="flex items-center gap-3">
-            <span className="text-2xl font-extrabold tracking-tight text-foreground">
-              NADOM<span className="text-primary">.BG</span>
+            <span className="text-2xl font-extrabold tracking-tight text-white">
+              NADOM<span className="text-white/70">.BG</span>
             </span>
-            <span className="hidden md:block text-[10px] text-muted-foreground uppercase tracking-[0.2em] leading-tight border-l border-border pl-3">
+            <span className="hidden md:block text-[10px] text-white/50 uppercase tracking-[0.2em] leading-tight border-l border-white/20 pl-3">
               Агенция
               <br />
               Домоуправител
@@ -35,7 +35,7 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-primary after:transition-all hover:after:w-full"
+                className="text-sm font-medium text-white/70 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full"
               >
                 {link.label}
               </a>
@@ -46,10 +46,10 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-5">
             <a
               href="tel:070020215"
-              className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-white hover:text-white/80 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Phone className="size-3.5 text-primary" />
+              <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+                <Phone className="size-3.5 text-white" />
               </div>
               0700 20 215
             </a>
@@ -57,13 +57,14 @@ export default function Navbar() {
               signInText="Вход"
               signOutText="Изход"
               size="sm"
+              className="bg-white/15 text-white border-white/20 hover:bg-white/25"
             />
           </div>
 
           {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden p-2 text-foreground"
+            className="lg:hidden p-2 text-white"
             aria-label={mobileOpen ? "Затвори менюто" : "Отвори менюто"}
           >
             {mobileOpen ? <X className="size-6" /> : <Menu className="size-6" />}
@@ -83,16 +84,16 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="block text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition-colors py-3 px-3 rounded-lg"
+                className="block text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors py-3 px-3 rounded-lg"
               >
                 {link.label}
               </a>
             ))}
             <a
               href="tel:070020215"
-              className="flex items-center gap-2 text-sm font-semibold text-foreground py-3 px-3"
+              className="flex items-center gap-2 text-sm font-semibold text-white py-3 px-3"
             >
-              <Phone className="size-4 text-primary" />
+              <Phone className="size-4 text-white/70" />
               0700 20 215
             </a>
             <div className="px-3 pt-2">
@@ -100,7 +101,7 @@ export default function Navbar() {
                 signInText="Вход"
                 signOutText="Изход"
                 size="sm"
-                className="w-full"
+                className="w-full bg-white/15 text-white border-white/20 hover:bg-white/25"
               />
             </div>
           </motion.div>

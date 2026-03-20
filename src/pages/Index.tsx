@@ -15,12 +15,19 @@ const STATS = [
 
 export default function Index() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative">
+      {/* Fixed gradient background - visible everywhere below hero */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[oklch(0.42_0.16_250)] via-[oklch(0.58_0.13_232)] to-[oklch(0.78_0.09_218)]" />
+        {/* White glow - bottom right corner */}
+        <div className="absolute bottom-0 right-0 w-[900px] h-[900px] rounded-full bg-white/40 blur-[250px] translate-x-1/4 translate-y-1/4" />
+      </div>
+
       <Navbar />
       <HeroSection />
 
       {/* Stats Bar */}
-      <section className="bg-primary py-12 lg:py-16">
+      <section className="py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {STATS.map((stat, i) => (
@@ -31,10 +38,10 @@ export default function Index() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: i * 0.1 }}
               >
-                <div className="text-3xl lg:text-4xl font-extrabold text-primary-foreground tracking-tight">
+                <div className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
                   {stat.value}
                 </div>
-                <div className="text-sm text-primary-foreground/70 mt-1 font-medium">
+                <div className="text-sm text-white/70 mt-1 font-medium">
                   {stat.label}
                 </div>
               </motion.div>

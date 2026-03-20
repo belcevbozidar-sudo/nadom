@@ -15,7 +15,7 @@ const CONTACT_ITEMS = [
     content: (
       <a
         href="tel:070020215"
-        className="text-muted-foreground hover:text-primary transition-colors text-sm"
+        className="text-white/80 hover:text-white transition-colors text-sm"
       >
         0700 20 215
       </a>
@@ -27,7 +27,7 @@ const CONTACT_ITEMS = [
     content: (
       <a
         href="mailto:office@nadom.bg"
-        className="text-muted-foreground hover:text-primary transition-colors text-sm"
+        className="text-white/80 hover:text-white transition-colors text-sm"
       >
         office@nadom.bg
       </a>
@@ -41,7 +41,7 @@ const CONTACT_ITEMS = [
         {ADDRESSES.map((addr) => (
           <li
             key={addr}
-            className="text-sm text-muted-foreground leading-relaxed"
+            className="text-sm text-white/70 leading-relaxed"
           >
             {addr}
           </li>
@@ -53,7 +53,7 @@ const CONTACT_ITEMS = [
 
 export default function ContactSection() {
   return (
-    <section id="контакти" className="py-20 lg:py-28 bg-background">
+    <section id="контакти" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section heading */}
         <motion.div
@@ -63,10 +63,10 @@ export default function ContactSection() {
           transition={{ duration: 0.5 }}
           className="mb-14"
         >
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
             КОНТАКТИ
           </h2>
-          <div className="w-16 h-1 bg-primary mt-4 rounded-full" />
+          <div className="w-16 h-1 bg-white mt-4 rounded-full" />
         </motion.div>
 
         {/* Contact cards */}
@@ -80,11 +80,11 @@ export default function ContactSection() {
               transition={{ duration: 0.4, delay: i * 0.1 }}
               className="flex items-start gap-4"
             >
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <item.icon className="size-5 text-primary" />
+              <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+                <item.icon className="size-5 text-white" />
               </div>
               <div>
-                <h3 className="font-bold text-foreground mb-2 text-sm uppercase tracking-wider">
+                <h3 className="font-bold text-white mb-2 text-sm uppercase tracking-wider">
                   {item.title}
                 </h3>
                 {item.content}

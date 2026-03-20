@@ -41,7 +41,7 @@ const PROPERTIES = [
 
 export default function PropertiesSection() {
   return (
-    <section id="имоти" className="py-20 lg:py-28 bg-background">
+    <section id="имоти" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section heading */}
         <motion.div
@@ -51,10 +51,10 @@ export default function PropertiesSection() {
           transition={{ duration: 0.5 }}
           className="mb-12"
         >
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
             ИМОТИ
           </h2>
-          <div className="w-16 h-1 bg-primary mt-4 rounded-full" />
+          <div className="w-16 h-1 bg-white mt-4 rounded-full" />
         </motion.div>
 
         {/* Property cards */}
@@ -67,33 +67,33 @@ export default function PropertiesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.1 }}
             >
-              <Card className="pt-0 overflow-hidden group cursor-pointer hover:shadow-xl transition-all duration-300 border-border/60">
+              <Card className="pt-0 overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-300 border-white/20 bg-white/95 backdrop-blur-sm shadow-lg">
                 <div className="relative overflow-hidden">
                   <img
                     src={property.image}
                     alt={property.type}
                     className="w-full h-52 object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <Badge className="absolute top-3 right-3 bg-primary text-primary-foreground font-bold text-[10px] tracking-wider px-3 py-1 shadow-lg">
+                  <Badge className="absolute top-3 right-3 bg-white text-[oklch(0.35_0.12_250)] font-bold text-[10px] tracking-wider px-3 py-1 shadow-lg">
                     ПРОДАВА
                   </Badge>
                 </div>
                 <CardContent className="pt-4 space-y-2.5">
-                  <h3 className="font-bold text-foreground text-sm">
+                  <h3 className="font-bold text-[oklch(0.14_0.04_255)] text-sm">
                     {property.type}
                   </h3>
-                  <div className="flex items-start gap-1.5 text-muted-foreground text-xs">
+                  <div className="flex items-start gap-1.5 text-[oklch(0.45_0.03_250)] text-xs">
                     <MapPin className="size-3.5 shrink-0 mt-0.5" />
                     <span className="line-clamp-2 leading-relaxed">
                       {property.location}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-border">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div className="flex items-center justify-between pt-3 border-t border-[oklch(0.90_0.01_250)]">
+                    <div className="flex items-center gap-1.5 text-xs text-[oklch(0.45_0.03_250)]">
                       <Maximize2 className="size-3" />
                       <span>{property.area} кв.м.</span>
                     </div>
-                    <span className="font-extrabold text-foreground text-sm">
+                    <span className="font-extrabold text-[oklch(0.14_0.04_255)] text-sm">
                       {property.price} EUR
                     </span>
                   </div>
@@ -115,7 +115,7 @@ export default function PropertiesSection() {
             onClick={() =>
               toast.info("Тази функция ще бъде налична скоро!")
             }
-            className="text-primary font-semibold text-sm hover:underline underline-offset-4 transition-all"
+            className="text-white font-semibold text-sm hover:text-white/80 underline underline-offset-4 transition-all"
           >
             Виж всички обяви &rarr;
           </button>

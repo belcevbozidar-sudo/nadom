@@ -50,7 +50,7 @@ const GENERAL_SERVICES = [
 
 export default function ServicesSection() {
   return (
-    <section id="услуги" className="py-20 lg:py-28 bg-secondary/50">
+    <section id="услуги" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section heading */}
         <motion.div
@@ -60,10 +60,10 @@ export default function ServicesSection() {
           transition={{ duration: 0.5 }}
           className="mb-14"
         >
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight">
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
             ВСИЧКО ЗА ВАШАТА СГРАДА
           </h2>
-          <div className="w-16 h-1 bg-primary mt-4 rounded-full" />
+          <div className="w-16 h-1 bg-white mt-4 rounded-full" />
         </motion.div>
 
         {/* Image overview cards */}
@@ -76,7 +76,7 @@ export default function ServicesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.12 }}
             >
-              <div className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-lg">
+              <div className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-xl border border-white/10">
                 <img
                   src={card.image}
                   alt={card.title}
@@ -103,10 +103,10 @@ export default function ServicesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="text-xl font-bold text-foreground mb-6 flex items-center gap-3"
+              className="text-xl font-bold text-white mb-6 flex items-center gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Building2 className="size-5 text-primary" />
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Building2 className="size-5 text-white" />
               </div>
               ЖИЛИЩНИ И ОФИС СГРАДИ
             </motion.h3>
@@ -119,9 +119,9 @@ export default function ServicesSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: i * 0.08 }}
                 >
-                  <Card className="flex flex-col items-center text-center p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group bg-card">
-                    <svc.icon className="size-8 text-primary mb-3 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-sm font-semibold text-foreground">
+                  <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
+                    <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
                       {svc.label}
                     </span>
                   </Card>
@@ -137,10 +137,10 @@ export default function ServicesSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4 }}
-              className="text-xl font-bold text-foreground mb-6 flex items-center gap-3"
+              className="text-xl font-bold text-white mb-6 flex items-center gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Settings className="size-5 text-primary" />
+              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                <Settings className="size-5 text-white" />
               </div>
               УСЛУГИ
             </motion.h3>
@@ -153,9 +153,9 @@ export default function ServicesSection() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.3, delay: i * 0.08 }}
                 >
-                  <Card className="flex flex-col items-center text-center p-6 hover:shadow-lg hover:border-primary/30 transition-all duration-300 cursor-pointer group bg-card">
-                    <svc.icon className="size-8 text-primary mb-3 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-sm font-semibold text-foreground">
+                  <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
+                    <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3 group-hover:scale-110 transition-transform duration-300" />
+                    <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
                       {svc.label}
                     </span>
                   </Card>
