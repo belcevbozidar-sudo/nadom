@@ -48,120 +48,216 @@ const GENERAL_SERVICES = [
   { icon: FileCheck, label: "Сделки и застраховки" },
 ];
 
+// Stagger container
+const stagger = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.12 },
+  },
+};
+
+const fadeSlideUp = {
+  hidden: { opacity: 0, y: 50, scale: 0.9 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: "spring" as const,
+      stiffness: 150,
+      damping: 20,
+    },
+  },
+};
+
+const iconCardVariant = {
+  hidden: { opacity: 0, y: 30, rotateX: 15 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    rotateX: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 200,
+      damping: 18,
+    },
+  },
+};
+
 export default function ServicesSection() {
   return (
     <section id="услуги" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section heading */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          initial={{ opacity: 0, x: -60 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="mb-14"
         >
           <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
             ВСИЧКО ЗА ВАШАТА СГРАДА
           </h2>
-          <div className="w-16 h-1 bg-white mt-4 rounded-full" />
+          <motion.div
+            className="w-16 h-1 bg-white mt-4 rounded-full origin-left"
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          />
         </motion.div>
 
         {/* Image overview cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
-          {SERVICE_CARDS.map((card, i) => (
-            <motion.div
-              key={card.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.12 }}
-            >
-              <div className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-xl border border-white/10">
-                <img
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20"
+          variants={stagger}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-60px" }}
+        >
+          {SERVICE_CARDS.map((card) => (
+            <motion.div key={card.title} variants={fadeSlideUp}>
+              <motion.div
+                className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-xl border border-white/10"
+                whileHover={{ y: -8, scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <motion.img
                   src={card.image}
                   alt={card.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover"
+                  whileHover={{ scale: 1.12 }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6">
+                <motion.div
+                  className="absolute bottom-0 left-0 right-0 p-6"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
                   <h3 className="text-white font-bold text-lg mb-1">
                     {card.title}
                   </h3>
                   <p className="text-white/60 text-sm">{card.description}</p>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* Icon grids */}
         <div className="grid lg:grid-cols-2 gap-14">
           {/* Building services */}
           <div>
             <motion.h3
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="text-xl font-bold text-white mb-6 flex items-center gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <motion.div
+                className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
+                initial={{ rotate: -180, scale: 0 }}
+                whileInView={{ rotate: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 15,
+                  delay: 0.1,
+                }}
+              >
                 <Building2 className="size-5 text-white" />
-              </div>
+              </motion.div>
               ЖИЛИЩНИ И ОФИС СГРАДИ
             </motion.h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {BUILDING_SERVICES.map((svc, i) => (
-                <motion.div
-                  key={svc.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: i * 0.08 }}
-                >
-                  <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
-                    <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
-                      {svc.label}
-                    </span>
-                  </Card>
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+              variants={stagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-40px" }}
+            >
+              {BUILDING_SERVICES.map((svc) => (
+                <motion.div key={svc.label} variants={iconCardVariant}>
+                  <motion.div
+                    whileHover={{ y: -6, scale: 1.04 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
+                      <motion.div
+                        whileHover={{ rotate: 8, scale: 1.2 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
+                      >
+                        <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3" />
+                      </motion.div>
+                      <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
+                        {svc.label}
+                      </span>
+                    </Card>
+                  </motion.div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
 
           {/* General services */}
           <div>
             <motion.h3
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               className="text-xl font-bold text-white mb-6 flex items-center gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+              <motion.div
+                className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center"
+                initial={{ rotate: 180, scale: 0 }}
+                whileInView={{ rotate: 0, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 15,
+                  delay: 0.1,
+                }}
+              >
                 <Settings className="size-5 text-white" />
-              </div>
+              </motion.div>
               УСЛУГИ
             </motion.h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {GENERAL_SERVICES.map((svc, i) => (
-                <motion.div
-                  key={svc.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.3, delay: i * 0.08 }}
-                >
-                  <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
-                    <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3 group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
-                      {svc.label}
-                    </span>
-                  </Card>
+            <motion.div
+              className="grid grid-cols-2 sm:grid-cols-3 gap-4"
+              variants={stagger}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-40px" }}
+            >
+              {GENERAL_SERVICES.map((svc) => (
+                <motion.div key={svc.label} variants={iconCardVariant}>
+                  <motion.div
+                    whileHover={{ y: -6, scale: 1.04 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
+                      <motion.div
+                        whileHover={{ rotate: -8, scale: 1.2 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
+                      >
+                        <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3" />
+                      </motion.div>
+                      <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
+                        {svc.label}
+                      </span>
+                    </Card>
+                  </motion.div>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

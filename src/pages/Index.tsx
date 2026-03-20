@@ -33,17 +33,32 @@ export default function Index() {
             {STATS.map((stat, i) => (
               <motion.div
                 key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
+                initial={{ opacity: 0, scale: 0.5, y: 30 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 20,
+                  delay: i * 0.12,
+                }}
               >
-                <div className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                <motion.div
+                  className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                >
                   {stat.value}
-                </div>
-                <div className="text-sm text-white/70 mt-1 font-medium">
+                </motion.div>
+                <motion.div
+                  className="text-sm text-white/70 mt-1 font-medium"
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: 0.3 + i * 0.12 }}
+                >
                   {stat.label}
-                </div>
+                </motion.div>
               </motion.div>
             ))}
           </div>
