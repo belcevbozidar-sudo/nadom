@@ -11,6 +11,7 @@ import {
   Building2,
   Settings,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card.tsx";
 
 const SERVICE_CARDS = [
@@ -19,18 +20,21 @@ const SERVICE_CARDS = [
     description: "Професионално управление на вашата жилищна сграда",
     image:
       "https://images.unsplash.com/photo-1763276674437-a1305c7021d1?w=800&q=80",
+    href: undefined as string | undefined,
   },
   {
     title: "Електронен касиер",
     description: "Удобно и прозрачно управление на финансите",
     image:
       "https://images.unsplash.com/photo-1758448721162-0c77cf477d6f?w=800&q=80",
+    href: undefined as string | undefined,
   },
   {
     title: "Административни услуги",
     description: "Пълно административно обслужване от врата до врата",
     image:
       "https://images.unsplash.com/flagged/photo-1551135049-83f3419ef05c?w=800&q=80",
+    href: "/administrativni-uslugi",
   },
 ];
 
@@ -116,8 +120,8 @@ export default function ServicesSection() {
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
         >
-          {SERVICE_CARDS.map((card) => (
-            <motion.div key={card.title} variants={fadeSlideUp}>
+          {SERVICE_CARDS.map((card) => {
+            const cardContent = (
               <motion.div
                 className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-xl border border-white/10"
                 whileHover={{ y: -8, scale: 1.02 }}
@@ -144,8 +148,18 @@ export default function ServicesSection() {
                   <p className="text-white/60 text-sm">{card.description}</p>
                 </motion.div>
               </motion.div>
-            </motion.div>
-          ))}
+            );
+
+            return (
+              <motion.div key={card.title} variants={fadeSlideUp}>
+                {card.href ? (
+                  <Link to={card.href}>{cardContent}</Link>
+                ) : (
+                  cardContent
+                )}
+              </motion.div>
+            );
+          })}
         </motion.div>
 
         {/* Icon grids */}
