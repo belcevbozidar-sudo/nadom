@@ -1,17 +1,40 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Phone } from "lucide-react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { SignInButton } from "@/components/ui/signin.tsx";
 
 const NAV_LINKS = [
-  { label: "Начало", href: "#начало" },
-  { label: "Услуги", href: "#услуги" },
-  { label: "Имоти", href: "#имоти" },
-  { label: "Контакти", href: "#контакти" },
+  { label: "Начало", hash: "#начало" },
+  { label: "Услуги", hash: "#услуги" },
+  { label: "Имоти", hash: "#имоти" },
+  { label: "Контакти", hash: "#контакти" },
 ];
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isHomePage = location.pathname === "/";
+
+  const handleNavClick = useCallback(
+    (hash: string) => {
+      setMobileOpen(false);
+      if (isHomePage) {
+        // Already on home page - smooth scroll to section
+        const el = document.querySelector(hash);
+        el?.scrollIntoView({ behavior: "smooth" });
+      } else {
+        // Navigate to home first, then scroll to section
+        navigate("/");
+        setTimeout(() => {
+          const el = document.querySelector(hash);
+          el?.scrollIntoView({ behavior: "smooth" });
+        }, 150);
+      }
+    },
+    [isHomePage, navigate],
+  );
 
   return (
     <motion.nav
@@ -22,32 +45,32 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
-          <motion.a
-            href="#начало"
-            className="flex items-center gap-3"
+          {/* Logo - always navigates to home */}
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
-            <span className="text-2xl font-extrabold tracking-tight text-white">
-              NADOM<span className="text-white/70">.BG</span>
-            </span>
-            <span className="hidden md:block text-[10px] text-white/50 uppercase tracking-[0.2em] leading-tight border-l border-white/20 pl-3">
-              Агенция
-              <br />
-              Домоуправител
-            </span>
-          </motion.a>
+            <Link to="/" className="flex items-center gap-3">
+              <span className="text-2xl font-extrabold tracking-tight text-white">
+                NADOM<span className="text-white/70">.BG</span>
+              </span>
+              <span className="hidden md:block text-[10px] text-white/50 uppercase tracking-[0.2em] leading-tight border-l border-white/20 pl-3">
+                Агенция
+                <br />
+                Домоуправител
+              </span>
+            </Link>
+          </motion.div>
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-8">
             {NAV_LINKS.map((link, i) => (
-              <motion.a
-                key={link.href}
-                href={link.href}
+              <motion.button
+                key={link.hash}
+                onClick={() => handleNavClick(link.hash)}
                 initial={{ opacity: 0, y: -15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -56,10 +79,10 @@ export default function Navbar() {
                   ease: "easeOut",
                 }}
                 whileHover={{ y: -2 }}
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full"
+                className="text-sm font-medium text-white/70 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full cursor-pointer"
               >
                 {link.label}
-              </motion.a>
+              </motion.button>
             ))}
           </div>
 
@@ -82,7 +105,12 @@ export default function Navbar() {
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4, delay: 0.7, type: "spring", stiffness: 200 }}
+              transition={{
+                duration: 0.4,
+                delay: 0.7,
+                type: "spring",
+                stiffness: 200,
+              }}
             >
               <SignInButton
                 signInText="Вход"
@@ -101,7 +129,11 @@ export default function Navbar() {
             whileTap={{ scale: 0.85, rotate: 90 }}
             transition={{ type: "spring", stiffness: 300, damping: 15 }}
           >
-            {mobileOpen ? <X className="size-6" /> : <Menu className="size-6" />}
+            {mobileOpen ? (
+              <X className="size-6" />
+            ) : (
+              <Menu className="size-6" />
+            )}
           </motion.button>
         </div>
 
@@ -117,18 +149,17 @@ export default function Navbar() {
             >
               <div className="pb-6 space-y-1">
                 {NAV_LINKS.map((link, i) => (
-                  <motion.a
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
+                  <motion.button
+                    key={link.hash}
+                    onClick={() => handleNavClick(link.hash)}
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -30 }}
                     transition={{ duration: 0.3, delay: i * 0.06 }}
-                    className="block text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors py-3 px-3 rounded-lg"
+                    className="block w-full text-left text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition-colors py-3 px-3 rounded-lg"
                   >
                     {link.label}
-                  </motion.a>
+                  </motion.button>
                 ))}
                 <motion.a
                   href="tel:070020215"
