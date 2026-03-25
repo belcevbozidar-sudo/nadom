@@ -6,6 +6,7 @@ import Index from "./pages/Index.tsx";
 import AdminServicesPage from "./pages/admin-services/page.tsx";
 import DomoupravitelPage from "./pages/domoupravitel/page.tsx";
 import ElKasierPage from "./pages/el-kasier/page.tsx";
+import PropertyDetailPage from "./pages/imoti/page.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/administrativni-uslugi" element={<AdminServicesPage />} />
           <Route path="/domoupravitel" element={<DomoupravitelPage />} />
           <Route path="/el-kasier" element={<ElKasierPage />} />
+          <Route path="/imoti/:id" element={<PropertyDetailPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

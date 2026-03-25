@@ -153,14 +153,14 @@ export default function AdminServicesPage() {
       <section className="py-16 lg:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
-            className="bg-white rounded-2xl shadow-xl p-8 lg:p-12"
+            className="bg-white/[0.08] backdrop-blur-xl border border-white/15 rounded-2xl shadow-xl p-8 lg:p-12"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.7, ease: EASE_OUT_EXPO }}
           >
             <motion.h2
-              className="text-2xl lg:text-3xl font-extrabold text-[oklch(0.14_0.04_255)] mb-6 tracking-tight"
+              className="text-2xl lg:text-3xl font-extrabold text-white mb-6 tracking-tight"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -169,7 +169,7 @@ export default function AdminServicesPage() {
               Какво можем да направим за вас?
             </motion.h2>
             <motion.p
-              className="text-[oklch(0.35_0.03_250)] leading-relaxed text-base lg:text-lg"
+              className="text-white/70 leading-relaxed text-base lg:text-lg"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -257,18 +257,18 @@ function ServiceCard({
       whileHover={{ y: -6, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
-      <Card className="h-full bg-white/95 backdrop-blur-sm border-white/20 shadow-lg hover:shadow-2xl transition-shadow duration-300 p-6 flex flex-col items-center text-center">
+      <Card className="h-full bg-white/[0.08] backdrop-blur-xl border-white/15 shadow-lg hover:shadow-2xl hover:bg-white/[0.12] transition-all duration-300 p-6 flex flex-col items-center text-center">
         <motion.div
-          className="w-16 h-16 rounded-2xl bg-[oklch(0.35_0.12_250/0.1)] flex items-center justify-center mb-5"
+          className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mb-5"
           whileHover={{ rotate: 8, scale: 1.1 }}
           transition={{ type: "spring", stiffness: 300, damping: 12 }}
         >
-          <Icon className="size-8 text-[oklch(0.35_0.12_250)]" />
+          <Icon className="size-8 text-white/90" />
         </motion.div>
-        <h3 className="font-bold text-[oklch(0.14_0.04_255)] text-sm lg:text-base mb-3 leading-snug">
+        <h3 className="font-bold text-white text-sm lg:text-base mb-3 leading-snug">
           {title}
         </h3>
-        <p className="text-[oklch(0.40_0.03_250)] text-xs lg:text-sm leading-relaxed">
+        <p className="text-white/60 text-xs lg:text-sm leading-relaxed">
           {description}
         </p>
       </Card>

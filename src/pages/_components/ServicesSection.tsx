@@ -20,14 +20,14 @@ const SERVICE_CARDS = [
     description: "Професионално управление на вашата жилищна сграда",
     image:
       "https://images.unsplash.com/photo-1763276674437-a1305c7021d1?w=800&q=80",
-    href: undefined as string | undefined,
+    href: "/domoupravitel",
   },
   {
     title: "Електронен касиер",
     description: "Удобно и прозрачно управление на финансите",
     image:
       "https://images.unsplash.com/photo-1758448721162-0c77cf477d6f?w=800&q=80",
-    href: undefined as string | undefined,
+    href: "/el-kasier",
   },
   {
     title: "Административни услуги",
@@ -120,46 +120,38 @@ export default function ServicesSection() {
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
         >
-          {SERVICE_CARDS.map((card) => {
-            const cardContent = (
-              <motion.div
-                className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-xl border border-white/10"
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <motion.img
-                  src={card.image}
-                  alt={card.title}
-                  className="w-full h-full object-cover"
-                  whileHover={{ scale: 1.12 }}
-                  transition={{ duration: 0.7, ease: "easeOut" }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+          {SERVICE_CARDS.map((card) => (
+            <motion.div key={card.title} variants={fadeSlideUp}>
+              <Link to={card.href}>
                 <motion.div
-                  className="absolute bottom-0 left-0 right-0 p-6"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-xl border border-white/10"
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <h3 className="text-white font-bold text-lg mb-1">
-                    {card.title}
-                  </h3>
-                  <p className="text-white/60 text-sm">{card.description}</p>
+                  <motion.img
+                    src={card.image}
+                    alt={card.title}
+                    className="w-full h-full object-cover"
+                    whileHover={{ scale: 1.12 }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                  <motion.div
+                    className="absolute bottom-0 left-0 right-0 p-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                  >
+                    <h3 className="text-white font-bold text-lg mb-1">
+                      {card.title}
+                    </h3>
+                    <p className="text-white/60 text-sm">{card.description}</p>
+                  </motion.div>
                 </motion.div>
-              </motion.div>
-            );
-
-            return (
-              <motion.div key={card.title} variants={fadeSlideUp}>
-                {card.href ? (
-                  <Link to={card.href}>{cardContent}</Link>
-                ) : (
-                  cardContent
-                )}
-              </motion.div>
-            );
-          })}
+              </Link>
+            </motion.div>
+          ))}
         </motion.div>
 
         {/* Icon grids */}
