@@ -3,19 +3,16 @@ import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Phone } from "lucide-react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { SignInButton } from "@/components/ui/signin.tsx";
-import { toast } from "sonner";
-
 type NavLink = {
   label: string;
   hash?: string;
   href?: string;
-  comingSoon?: boolean;
 };
 
 const NAV_LINKS: NavLink[] = [
   { label: "Начало", hash: "#начало" },
-  { label: "Домоуправител", comingSoon: true },
-  { label: "Ел. Касиер", comingSoon: true },
+  { label: "Домоуправител", href: "/domoupravitel" },
+  { label: "Ел. Касиер", href: "/el-kasier" },
   { label: "Имоти", hash: "#имоти" },
   { label: "Контакти", hash: "#контакти" },
 ];
@@ -29,11 +26,6 @@ export default function Navbar() {
   const handleNavClick = useCallback(
     (link: NavLink) => {
       setMobileOpen(false);
-
-      if (link.comingSoon) {
-        toast.info("Тази страница ще бъде налична скоро!");
-        return;
-      }
 
       if (link.href) {
         navigate(link.href);
