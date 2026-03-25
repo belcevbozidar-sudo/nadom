@@ -3,10 +3,19 @@ import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Phone } from "lucide-react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { SignInButton } from "@/components/ui/signin.tsx";
+import { toast } from "sonner";
 
-const NAV_LINKS = [
+type NavLink = {
+  label: string;
+  hash?: string;
+  href?: string;
+  comingSoon?: boolean;
+};
+
+const NAV_LINKS: NavLink[] = [
   { label: "Начало", hash: "#начало" },
-  { label: "Услуги", hash: "#услуги" },
+  { label: "Домоуправител", comingSoon: true },
+  { label: "Ел. Касиер", comingSoon: true },
   { label: "Имоти", hash: "#имоти" },
   { label: "Контакти", hash: "#контакти" },
 ];
@@ -18,19 +27,30 @@ export default function Navbar() {
   const isHomePage = location.pathname === "/";
 
   const handleNavClick = useCallback(
-    (hash: string) => {
+    (link: NavLink) => {
       setMobileOpen(false);
-      if (isHomePage) {
-        // Already on home page - smooth scroll to section
-        const el = document.querySelector(hash);
-        el?.scrollIntoView({ behavior: "smooth" });
-      } else {
-        // Navigate to home first, then scroll to section
-        navigate("/");
-        setTimeout(() => {
-          const el = document.querySelector(hash);
+
+      if (link.comingSoon) {
+        toast.info("Тази страница ще бъде налична скоро!");
+        return;
+      }
+
+      if (link.href) {
+        navigate(link.href);
+        return;
+      }
+
+      if (link.hash) {
+        if (isHomePage) {
+          const el = document.querySelector(link.hash);
           el?.scrollIntoView({ behavior: "smooth" });
-        }, 150);
+        } else {
+          navigate("/");
+          setTimeout(() => {
+            const el = document.querySelector(link.hash!);
+            el?.scrollIntoView({ behavior: "smooth" });
+          }, 150);
+        }
       }
     },
     [isHomePage, navigate],
@@ -66,11 +86,11 @@ export default function Navbar() {
           </motion.div>
 
           {/* Desktop nav */}
-          <div className="hidden lg:flex items-center gap-8">
+          <div className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link, i) => (
               <motion.button
-                key={link.hash}
-                onClick={() => handleNavClick(link.hash)}
+                key={link.label}
+                onClick={() => handleNavClick(link)}
                 initial={{ opacity: 0, y: -15 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -79,15 +99,15 @@ export default function Navbar() {
                   ease: "easeOut",
                 }}
                 whileHover={{ y: -2 }}
-                className="text-sm font-medium text-white/70 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full cursor-pointer"
+                className="text-sm font-medium text-white/70 hover:text-white transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-white after:transition-all hover:after:w-full cursor-pointer px-3 py-2"
               >
                 {link.label}
               </motion.button>
             ))}
-          </div>
 
-          {/* Right side */}
-          <div className="hidden lg:flex items-center gap-5">
+            {/* Separator */}
+            <div className="w-px h-5 bg-white/20 mx-2" />
+
             <motion.a
               href="tel:070020215"
               initial={{ opacity: 0, x: 20 }}
@@ -95,13 +115,14 @@ export default function Navbar() {
               transition={{ duration: 0.5, delay: 0.6 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="flex items-center gap-2 text-sm font-semibold text-white hover:text-white/80 transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-white hover:text-white/80 transition-colors px-3"
             >
-              <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
-                <Phone className="size-3.5 text-white" />
+              <div className="w-7 h-7 rounded-full bg-white/15 flex items-center justify-center">
+                <Phone className="size-3 text-white" />
               </div>
               0700 20 215
             </motion.a>
+
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -111,6 +132,7 @@ export default function Navbar() {
                 type: "spring",
                 stiffness: 200,
               }}
+              className="ml-2"
             >
               <SignInButton
                 signInText="Вход"
@@ -150,8 +172,8 @@ export default function Navbar() {
               <div className="pb-6 space-y-1">
                 {NAV_LINKS.map((link, i) => (
                   <motion.button
-                    key={link.hash}
-                    onClick={() => handleNavClick(link.hash)}
+                    key={link.label}
+                    onClick={() => handleNavClick(link)}
                     initial={{ opacity: 0, x: -30 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -30 }}
@@ -165,7 +187,7 @@ export default function Navbar() {
                   href="tel:070020215"
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.24 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
                   className="flex items-center gap-2 text-sm font-semibold text-white py-3 px-3"
                 >
                   <Phone className="size-4 text-white/70" />
@@ -175,7 +197,7 @@ export default function Navbar() {
                   className="px-3 pt-2"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.3 }}
+                  transition={{ duration: 0.3, delay: 0.36 }}
                 >
                   <SignInButton
                     signInText="Вход"
