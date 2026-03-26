@@ -2,6 +2,7 @@ import Navbar from "./_components/Navbar.tsx";
 import HeroSection from "./_components/HeroSection.tsx";
 import PropertiesSection from "./_components/PropertiesSection.tsx";
 import ServicesSection from "./_components/ServicesSection.tsx";
+import ReviewsSection from "./_components/ReviewsSection.tsx";
 import ContactSection from "./_components/ContactSection.tsx";
 import Footer from "./_components/Footer.tsx";
 
@@ -19,6 +20,7 @@ export default function Index() {
       <HeroSection />
       <PropertiesSection />
       <ServicesSection />
+      <ReviewsSection />
       <ContactSection />
       <Footer />
     </div>
