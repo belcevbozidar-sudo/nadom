@@ -218,9 +218,22 @@ const TIME_FILTERS = [
   { label: "30 дни", days: 30 },
 ] as const;
 
+const PAGE_LABELS: Record<string, string> = {
+  "/": "Начална страница",
+  "/domoupravitel": "Домоуправител",
+  "/el-kasier": "Ел. Касиер",
+  "/administrativni-uslugi": "Административни услуги",
+};
+
+function getPageLabel(page: string): string {
+  if (PAGE_LABELS[page]) return PAGE_LABELS[page];
+  if (page.startsWith("/imoti/")) return `Имот ${page.replace("/imoti/", "")}`;
+  return page;
+}
+
 function SessionsPanel() {
   const [selectedDays, setSelectedDays] = useState<number>(7);
-  const sessionCount = useQuery(api.analytics.getSessionCount, {
+  const data = useQuery(api.analytics.getSessionCount, {
     days: selectedDays,
   });
 
@@ -249,24 +262,74 @@ function SessionsPanel() {
         </div>
       </div>
 
-      {sessionCount === undefined ? (
-        <Skeleton className="h-28 w-full max-w-xs rounded-xl bg-white/10" />
+      {data === undefined ? (
+        <div className="space-y-4">
+          <Skeleton className="h-28 w-full max-w-xs rounded-xl bg-white/10" />
+          <Skeleton className="h-48 w-full rounded-xl bg-white/10" />
+        </div>
       ) : (
-        <Card className="border-white/10 bg-white/5 backdrop-blur-md max-w-xs">
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                <Users className="size-5 text-blue-400" />
+        <>
+          {/* Main homepage sessions card */}
+          <Card className="border-white/10 bg-white/5 backdrop-blur-md max-w-xs">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <Users className="size-5 text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-3xl font-extrabold text-white tabular-nums">
+                    {data.homepageSessions}
+                  </p>
+                  <p className="text-xs text-white/50">Сесии на началната страница</p>
+                </div>
               </div>
-              <div>
-                <p className="text-3xl font-extrabold text-white tabular-nums">
-                  {sessionCount}
+            </CardContent>
+          </Card>
+
+          {/* Per-page breakdown table */}
+          <Card className="border-white/10 bg-white/5 backdrop-blur-md overflow-hidden">
+            <CardHeader>
+              <CardTitle className="text-white text-base">По страници</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {data.perPage.length === 0 ? (
+                <p className="text-white/50 text-sm text-center py-8">
+                  Няма данни за избрания период.
                 </p>
-                <p className="text-xs text-white/50">Сесии на началната страница</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left text-xs text-white/50 font-medium px-6 py-3">
+                          Страница
+                        </th>
+                        <th className="text-right text-xs text-white/50 font-medium px-6 py-3">
+                          Сесии
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {data.perPage.map((row) => (
+                        <tr
+                          key={row.page}
+                          className="border-b border-white/5 hover:bg-white/5 transition-colors"
+                        >
+                          <td className="px-6 py-3 text-sm text-white/80 font-medium">
+                            {getPageLabel(row.page)}
+                          </td>
+                          <td className="px-6 py-3 text-sm text-white/60 text-right tabular-nums">
+                            {row.sessions}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   );

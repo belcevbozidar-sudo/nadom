@@ -41,14 +41,35 @@ export const getSessionCount = query({
       now.getTime() - args.days * 24 * 60 * 60 * 1000,
     ).toISOString();
 
-    // Count only homepage visits
-    const visits = await ctx.db
+    // Count only homepage visits for the main metric
+    const homepageVisits = await ctx.db
       .query("pageVisits")
       .withIndex("by_page_and_time", (q) =>
         q.eq("page", "/").gte("visitedAt", sinceDate),
       )
       .collect();
 
-    return visits.length;
+    // Get all visits for per-page breakdown
+    const allVisits = await ctx.db
+      .query("pageVisits")
+      .withIndex("by_time", (q) => q.gte("visitedAt", sinceDate))
+      .collect();
+
+    // Per-page session counts
+    const pageMap = new Map<string, number>();
+    for (const visit of allVisits) {
+      pageMap.set(visit.page, (pageMap.get(visit.page) ?? 0) + 1);
+    }
+
+    const perPage: Array<{ page: string; sessions: number }> = [];
+    for (const [page, count] of pageMap) {
+      perPage.push({ page, sessions: count });
+    }
+    perPage.sort((a, b) => b.sessions - a.sessions);
+
+    return {
+      homepageSessions: homepageVisits.length,
+      perPage,
+    };
   },
 });
