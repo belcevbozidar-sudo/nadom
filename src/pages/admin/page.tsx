@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api.js";
 import { ConvexError } from "convex/values";
@@ -14,14 +14,45 @@ import {
   Lock,
   TrendingUp,
   Users,
+  ShieldAlert,
+  Timer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
+import { Checkbox } from "@/components/ui/checkbox.tsx";
+import { Label } from "@/components/ui/label.tsx";
 import type { Id } from "@/convex/_generated/dataModel.d.ts";
 
 const ADMIN_PASSWORD = "1122334455";
+const MAX_ATTEMPTS = 3;
+const LOCKOUT_MS = 60 * 60 * 1000; // 60 minutes
+const STORAGE_KEY_REMEMBER = "nadom_admin_remember";
+const STORAGE_KEY_LOCKOUT = "nadom_admin_lockout";
+
+type LockoutData = {
+  attempts: number;
+  lockedUntil: number | null; // unix ms
+};
+
+function getLockoutData(): LockoutData {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_LOCKOUT);
+    if (raw) return JSON.parse(raw) as LockoutData;
+  } catch {
+    // corrupted data, reset
+  }
+  return { attempts: 0, lockedUntil: null };
+}
+
+function setLockoutData(data: LockoutData) {
+  localStorage.setItem(STORAGE_KEY_LOCKOUT, JSON.stringify(data));
+}
+
+function clearLockoutData() {
+  localStorage.removeItem(STORAGE_KEY_LOCKOUT);
+}
 
 const PAGE_LABELS: Record<string, string> = {
   "/": "Начална страница",
@@ -41,50 +72,153 @@ function getPageLabel(page: string): string {
 function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [lockout, setLockout] = useState<LockoutData>(getLockoutData);
+  const [remainingTime, setRemainingTime] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+  const isLocked =
+    lockout.lockedUntil !== null && Date.now() < lockout.lockedUntil;
+
+  // Check "Remember me" on mount
+  useEffect(() => {
+    if (localStorage.getItem(STORAGE_KEY_REMEMBER) === "true") {
       onUnlock();
-    } else {
-      setError(true);
-      setPassword("");
     }
-  };
+  }, [onUnlock]);
+
+  // Countdown timer when locked out
+  useEffect(() => {
+    if (!isLocked) return;
+
+    const tick = () => {
+      const diff = (lockout.lockedUntil ?? 0) - Date.now();
+      if (diff <= 0) {
+        // Lockout expired, reset attempts
+        const reset: LockoutData = { attempts: 0, lockedUntil: null };
+        setLockoutData(reset);
+        setLockout(reset);
+        setRemainingTime("");
+        return;
+      }
+      const mins = Math.floor(diff / 60000);
+      const secs = Math.floor((diff % 60000) / 1000);
+      setRemainingTime(
+        `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`,
+      );
+    };
+
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [isLocked, lockout.lockedUntil]);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      if (isLocked) return;
+
+      if (password === ADMIN_PASSWORD) {
+        clearLockoutData();
+        if (rememberMe) {
+          localStorage.setItem(STORAGE_KEY_REMEMBER, "true");
+        }
+        onUnlock();
+      } else {
+        const newAttempts = lockout.attempts + 1;
+        const newLockout: LockoutData =
+          newAttempts >= MAX_ATTEMPTS
+            ? { attempts: newAttempts, lockedUntil: Date.now() + LOCKOUT_MS }
+            : { attempts: newAttempts, lockedUntil: null };
+        setLockoutData(newLockout);
+        setLockout(newLockout);
+        setError(true);
+        setPassword("");
+      }
+    },
+    [password, rememberMe, isLocked, lockout.attempts, onUnlock],
+  );
+
+  const attemptsLeft = MAX_ATTEMPTS - lockout.attempts;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-[oklch(0.15_0.04_250)] to-[oklch(0.10_0.03_250)]">
       <Card className="w-full max-w-sm border-white/10 bg-white/5 backdrop-blur-xl">
         <CardHeader className="text-center">
           <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
-            <Lock className="size-8 text-white/70" />
+            {isLocked ? (
+              <ShieldAlert className="size-8 text-red-400" />
+            ) : (
+              <Lock className="size-8 text-white/70" />
+            )}
           </div>
           <CardTitle className="text-white text-xl">Админ панел</CardTitle>
-          <p className="text-white/50 text-sm mt-1">Въведете парола за достъп</p>
+          <p className="text-white/50 text-sm mt-1">
+            {isLocked
+              ? "Достъпът е временно заключен"
+              : "Въведете парола за достъп"}
+          </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError(false);
-              }}
-              placeholder="Парола"
-              className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
-              autoFocus
-            />
-            {error && (
-              <p className="text-red-400 text-sm">Грешна парола. Опитайте отново.</p>
-            )}
-            <Button
-              type="submit"
-              className="w-full bg-white text-[oklch(0.15_0.04_250)] hover:bg-white/90 font-bold"
-            >
-              Вход
-            </Button>
-          </form>
+          {isLocked ? (
+            <div className="text-center space-y-4">
+              <div className="flex items-center justify-center gap-2 text-red-400">
+                <Timer className="size-5" />
+                <span className="text-2xl font-mono font-bold tabular-nums">
+                  {remainingTime}
+                </span>
+              </div>
+              <p className="text-white/40 text-sm">
+                Твърде много грешни опити. Изчакайте 60 минути преди да опитате
+                отново.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError(false);
+                }}
+                placeholder="Парола"
+                className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
+                autoFocus
+              />
+              {error && (
+                <p className="text-red-400 text-sm">
+                  Грешна парола.{" "}
+                  {attemptsLeft > 0
+                    ? `Остават ${attemptsLeft} ${attemptsLeft === 1 ? "опит" : "опита"}.`
+                    : ""}
+                </p>
+              )}
+
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="remember-me"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) =>
+                    setRememberMe(checked === true)
+                  }
+                  className="border-white/30 data-[state=checked]:bg-white data-[state=checked]:text-[oklch(0.15_0.04_250)]"
+                />
+                <Label
+                  htmlFor="remember-me"
+                  className="text-sm text-white/60 cursor-pointer select-none"
+                >
+                  Запомни ме
+                </Label>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-white text-[oklch(0.15_0.04_250)] hover:bg-white/90 font-bold"
+              >
+                Вход
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -415,7 +549,10 @@ export default function AdminPage() {
             </div>
             <Button
               size="sm"
-              onClick={() => setUnlocked(false)}
+              onClick={() => {
+                localStorage.removeItem(STORAGE_KEY_REMEMBER);
+                setUnlocked(false);
+              }}
               className="bg-white/10 text-white/70 hover:bg-white/20 border border-white/10"
             >
               <Lock className="size-3.5 mr-1.5" />
