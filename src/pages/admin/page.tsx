@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api.js";
 import { ConvexError } from "convex/values";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 import {
   Star,
   Eye,
@@ -10,12 +11,11 @@ import {
   Trash2,
   BarChart3,
   MessageSquare,
-  Globe,
   Lock,
-  TrendingUp,
   Users,
   ShieldAlert,
   Timer,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -33,7 +33,7 @@ const STORAGE_KEY_LOCKOUT = "nadom_admin_lockout";
 
 type LockoutData = {
   attempts: number;
-  lockedUntil: number | null; // unix ms
+  lockedUntil: number | null;
 };
 
 function getLockoutData(): LockoutData {
@@ -54,19 +54,6 @@ function clearLockoutData() {
   localStorage.removeItem(STORAGE_KEY_LOCKOUT);
 }
 
-const PAGE_LABELS: Record<string, string> = {
-  "/": "Начална страница",
-  "/domoupravitel": "Домоуправител",
-  "/el-kasier": "Ел. Касиер",
-  "/administrativni-uslugi": "Административни услуги",
-};
-
-function getPageLabel(page: string): string {
-  if (PAGE_LABELS[page]) return PAGE_LABELS[page];
-  if (page.startsWith("/imoti/")) return `Имот ${page.replace("/imoti/", "")}`;
-  return page;
-}
-
 // ── Password gate ──────────────────────────────────────────────
 
 function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
@@ -79,21 +66,18 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   const isLocked =
     lockout.lockedUntil !== null && Date.now() < lockout.lockedUntil;
 
-  // Check "Remember me" on mount
   useEffect(() => {
     if (localStorage.getItem(STORAGE_KEY_REMEMBER) === "true") {
       onUnlock();
     }
   }, [onUnlock]);
 
-  // Countdown timer when locked out
   useEffect(() => {
     if (!isLocked) return;
 
     const tick = () => {
       const diff = (lockout.lockedUntil ?? 0) - Date.now();
       if (diff <= 0) {
-        // Lockout expired, reset attempts
         const reset: LockoutData = { attempts: 0, lockedUntil: null };
         setLockoutData(reset);
         setLockout(reset);
@@ -225,7 +209,7 @@ function PasswordGate({ onUnlock }: { onUnlock: () => void }) {
   );
 }
 
-// ── Analytics panel ────────────────────────────────────────────
+// ── Sessions panel ─────────────────────────────────────────────
 
 const TIME_FILTERS = [
   { label: "Днес", days: 1 },
@@ -234,16 +218,18 @@ const TIME_FILTERS = [
   { label: "30 дни", days: 30 },
 ] as const;
 
-function AnalyticsPanel() {
+function SessionsPanel() {
   const [selectedDays, setSelectedDays] = useState<number>(7);
-  const analytics = useQuery(api.analytics.getAnalytics, { days: selectedDays });
+  const sessionCount = useQuery(api.analytics.getSessionCount, {
+    days: selectedDays,
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <h2 className="text-xl font-bold text-white flex items-center gap-2">
           <BarChart3 className="size-5" />
-          Аналитика
+          Сесии
         </h2>
         <div className="flex gap-2">
           {TIME_FILTERS.map((f) => (
@@ -263,113 +249,24 @@ function AnalyticsPanel() {
         </div>
       </div>
 
-      {analytics === undefined ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl bg-white/10" />
-          ))}
-        </div>
+      {sessionCount === undefined ? (
+        <Skeleton className="h-28 w-full max-w-xs rounded-xl bg-white/10" />
       ) : (
-        <>
-          {/* Summary cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Card className="border-white/10 bg-white/5 backdrop-blur-md">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                    <Users className="size-5 text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-white">
-                      {analytics.totalSessions}
-                    </p>
-                    <p className="text-xs text-white/50">Уникални сесии</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-white/10 bg-white/5 backdrop-blur-md">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                    <TrendingUp className="size-5 text-emerald-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-white">
-                      {analytics.totalViews}
-                    </p>
-                    <p className="text-xs text-white/50">Общо прегледи</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            <Card className="border-white/10 bg-white/5 backdrop-blur-md">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-                    <Globe className="size-5 text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-extrabold text-white">
-                      {analytics.perPage.length}
-                    </p>
-                    <p className="text-xs text-white/50">Активни страници</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Per-page table */}
-          <Card className="border-white/10 bg-white/5 backdrop-blur-md overflow-hidden">
-            <CardHeader>
-              <CardTitle className="text-white text-base">По страници</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              {analytics.perPage.length === 0 ? (
-                <p className="text-white/50 text-sm text-center py-8">
-                  Няма данни за избрания период.
+        <Card className="border-white/10 bg-white/5 backdrop-blur-md max-w-xs">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <Users className="size-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-3xl font-extrabold text-white tabular-nums">
+                  {sessionCount}
                 </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/10">
-                        <th className="text-left text-xs text-white/50 font-medium px-6 py-3">
-                          Страница
-                        </th>
-                        <th className="text-right text-xs text-white/50 font-medium px-6 py-3">
-                          Сесии
-                        </th>
-                        <th className="text-right text-xs text-white/50 font-medium px-6 py-3">
-                          Прегледи
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {analytics.perPage.map((row) => (
-                        <tr
-                          key={row.page}
-                          className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                        >
-                          <td className="px-6 py-3 text-sm text-white/80 font-medium">
-                            {getPageLabel(row.page)}
-                          </td>
-                          <td className="px-6 py-3 text-sm text-white/60 text-right tabular-nums">
-                            {row.sessions}
-                          </td>
-                          <td className="px-6 py-3 text-sm text-white/60 text-right tabular-nums">
-                            {row.views}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </>
+                <p className="text-xs text-white/50">Сесии на началната страница</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
@@ -447,7 +344,6 @@ function ReviewsPanel() {
               <CardContent className="pt-5 pb-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
-                    {/* Header row: author, stars, visibility badge */}
                     <div className="flex items-center gap-3 mb-2 flex-wrap">
                       <div className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center text-white font-bold text-sm shrink-0">
                         {review.authorName.charAt(0).toUpperCase()}
@@ -474,7 +370,6 @@ function ReviewsPanel() {
                       )}
                     </div>
 
-                    {/* Comment */}
                     <p className="text-sm text-white/70 leading-relaxed pl-11">
                       {review.comment}
                     </p>
@@ -490,7 +385,6 @@ function ReviewsPanel() {
                     </p>
                   </div>
 
-                  {/* Action buttons */}
                   <div className="flex gap-1.5 shrink-0">
                     <Button
                       size="sm"
@@ -529,7 +423,7 @@ function ReviewsPanel() {
 
 export default function AdminPage() {
   const [unlocked, setUnlocked] = useState(false);
-  const [activeTab, setActiveTab] = useState<"analytics" | "reviews">("analytics");
+  const [activeTab, setActiveTab] = useState<"sessions" | "reviews">("sessions");
 
   if (!unlocked) {
     return <PasswordGate onUnlock={() => setUnlocked(true)} />;
@@ -547,17 +441,15 @@ export default function AdminPage() {
               </h1>
               <p className="text-sm text-white/40 mt-0.5">NADOM.BG</p>
             </div>
-            <Button
-              size="sm"
-              onClick={() => {
-                localStorage.removeItem(STORAGE_KEY_REMEMBER);
-                setUnlocked(false);
-              }}
-              className="bg-white/10 text-white/70 hover:bg-white/20 border border-white/10"
-            >
-              <Lock className="size-3.5 mr-1.5" />
-              Изход
-            </Button>
+            <Link to="/">
+              <Button
+                size="sm"
+                className="bg-white/10 text-white/70 hover:bg-white/20 border border-white/10"
+              >
+                <ArrowLeft className="size-3.5 mr-1.5" />
+                Към сайта
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
@@ -566,15 +458,15 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         <div className="flex gap-1 bg-white/5 p-1 rounded-xl w-fit border border-white/10">
           <button
-            onClick={() => setActiveTab("analytics")}
+            onClick={() => setActiveTab("sessions")}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-              activeTab === "analytics"
+              activeTab === "sessions"
                 ? "bg-white text-[oklch(0.15_0.04_250)] shadow-sm"
                 : "text-white/60 hover:text-white hover:bg-white/10"
             }`}
           >
             <BarChart3 className="size-4 inline mr-1.5 -mt-0.5" />
-            Аналитика
+            Сесии
           </button>
           <button
             onClick={() => setActiveTab("reviews")}
@@ -592,7 +484,7 @@ export default function AdminPage() {
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === "analytics" ? <AnalyticsPanel /> : <ReviewsPanel />}
+        {activeTab === "sessions" ? <SessionsPanel /> : <ReviewsPanel />}
       </main>
     </div>
   );

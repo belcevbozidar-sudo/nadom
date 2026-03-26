@@ -10,7 +10,7 @@ export const recordVisit = mutation({
     const now = new Date();
     const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000).toISOString();
 
-    // Check if this session already visited this page within the last 10 minutes
+    // Check if this device already visited this page within the last 10 minutes
     const recentVisit = await ctx.db
       .query("pageVisits")
       .withIndex("by_session_page", (q) =>
@@ -20,7 +20,6 @@ export const recordVisit = mutation({
       .first();
 
     if (recentVisit && recentVisit.visitedAt > tenMinutesAgo) {
-      // Already recorded within 10 minutes, skip
       return null;
     }
 
@@ -32,7 +31,7 @@ export const recordVisit = mutation({
   },
 });
 
-export const getAnalytics = query({
+export const getSessionCount = query({
   args: {
     days: v.number(),
   },
@@ -42,41 +41,14 @@ export const getAnalytics = query({
       now.getTime() - args.days * 24 * 60 * 60 * 1000,
     ).toISOString();
 
-    // Get all visits since the date
+    // Count only homepage visits
     const visits = await ctx.db
       .query("pageVisits")
-      .withIndex("by_time", (q) => q.gte("visitedAt", sinceDate))
+      .withIndex("by_page_and_time", (q) =>
+        q.eq("page", "/").gte("visitedAt", sinceDate),
+      )
       .collect();
 
-    // Total unique sessions
-    const uniqueSessions = new Set(visits.map((v) => v.sessionId));
-
-    // Per-page stats
-    const pageMap = new Map<string, Set<string>>();
-    for (const visit of visits) {
-      if (!pageMap.has(visit.page)) {
-        pageMap.set(visit.page, new Set());
-      }
-      pageMap.get(visit.page)!.add(visit.sessionId);
-    }
-
-    const perPage: Array<{ page: string; sessions: number; views: number }> = [];
-    for (const [page, sessions] of pageMap) {
-      const pageViews = visits.filter((v) => v.page === page).length;
-      perPage.push({
-        page,
-        sessions: sessions.size,
-        views: pageViews,
-      });
-    }
-
-    // Sort by views descending
-    perPage.sort((a, b) => b.views - a.views);
-
-    return {
-      totalSessions: uniqueSessions.size,
-      totalViews: visits.length,
-      perPage,
-    };
+    return visits.length;
   },
 });
