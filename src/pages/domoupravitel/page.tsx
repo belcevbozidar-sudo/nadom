@@ -95,37 +95,23 @@ const SERVICES: ServiceCard[] = [
   },
 ];
 
-const ONE_TIME_SERVICES: ServiceCard[] = [
-  {
-    icon: WrenchIcon,
-    title: "Ремонт и поддръжка",
-    description:
-      "Професионален ремонт и поддръжка на общи части, ВиК, ел. инсталации и строителни дейности.",
-  },
-  {
-    icon: Truck,
-    title: "Транспорт",
-    description:
-      "Транспортни услуги за нуждите на етажната собственост — извозване на отпадъци, доставки и др.",
-  },
-  {
-    icon: KeyRound,
-    title: "Аксесоари за входа",
-    description:
-      "Домофонни системи, входни врати, пощенски кутии, осветление и други аксесоари за входа.",
-  },
-  {
-    icon: Info,
-    title: "Полезна информация",
-    description:
-      "Консултации и справки по въпроси, свързани с управление на етажна собственост и нормативна база.",
-  },
-  {
-    icon: FileCheck2,
-    title: "Сделки и застраховки",
-    description:
-      "Съдействие при сделки с недвижими имоти и сключване на застрахователни полици за сгради.",
-  },
+type CompactCard = {
+  icon: React.ElementType;
+  title: string;
+};
+
+const BUILDING_SERVICES: CompactCard[] = [
+  { icon: Users, title: "Проф. домоуправител" },
+  { icon: BarChart3, title: "Електронен касиер" },
+  { icon: Shield, title: "Контрол на достъпа" },
+];
+
+const EXTRA_SERVICES: CompactCard[] = [
+  { icon: WrenchIcon, title: "Ремонт и поддръжка" },
+  { icon: Truck, title: "Транспорт" },
+  { icon: KeyRound, title: "Аксесоари за входа" },
+  { icon: Info, title: "Полезна информация" },
+  { icon: FileCheck2, title: "Сделки и застраховки" },
 ];
 
 const HIGHLIGHTS = [
@@ -134,6 +120,31 @@ const HIGHLIGHTS = [
   "Прозрачно и коректно управление",
   "Онлайн достъп до документация 24/7",
 ];
+
+function CompactServiceCard({
+  service,
+  index,
+}: {
+  service: CompactCard;
+  index: number;
+}) {
+  const Icon = service.icon;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ duration: 0.5, delay: index * 0.07, ease: EASE }}
+      whileHover={{ y: -4, scale: 1.03 }}
+      className="group flex flex-col items-center justify-center rounded-2xl bg-white/95 backdrop-blur-sm p-5 lg:p-6 shadow-lg shadow-black/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-black/[0.08] aspect-square"
+    >
+      <Icon className="size-7 lg:size-8 text-[oklch(0.25_0.10_250)] mb-3 group-hover:scale-110 transition-transform duration-300" />
+      <span className="text-xs lg:text-sm font-bold text-[oklch(0.20_0.06_250)] text-center leading-tight">
+        {service.title}
+      </span>
+    </motion.div>
+  );
+}
 
 function ServiceGridCard({
   service,
@@ -302,8 +313,66 @@ export default function DomoupravitelPage() {
         </div>
       </section>
 
-      {/* Services grid */}
+      {/* Split-screen: Building services (left) + Extra services (right) */}
       <section id="услуги" className="py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
+            {/* Left column - Жилищни и офис сгради */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, ease: EASE }}
+            >
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.12] flex items-center justify-center">
+                  <BarChart3 className="size-5 text-white/80" />
+                </div>
+                <h2 className="text-lg lg:text-xl font-extrabold text-white tracking-tight uppercase">
+                  Жилищни и офис сгради
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                {BUILDING_SERVICES.map((s, i) => (
+                  <CompactServiceCard key={s.title} service={s} index={i} />
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Right column - Услуги (еднократни) */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.7, delay: 0.1, ease: EASE }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.12] flex items-center justify-center">
+                  <Wrench className="size-5 text-white/80" />
+                </div>
+                <h2 className="text-lg lg:text-xl font-extrabold text-white tracking-tight uppercase">
+                  Услуги
+                </h2>
+              </div>
+
+              <p className="text-sm text-white/50 mb-8 max-w-md leading-relaxed">
+                Тези услуги могат да бъдат използвани и заплатени еднократно 
+                от лица извън абонамент.
+              </p>
+
+              <div className="grid grid-cols-3 gap-4">
+                {EXTRA_SERVICES.map((s, i) => (
+                  <CompactServiceCard key={s.title} service={s} index={i} />
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Detailed services grid */}
+      <section className="py-20 lg:py-28 border-t border-white/[0.06]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-16"
@@ -325,88 +394,6 @@ export default function DomoupravitelPage() {
             {SERVICES.map((service, i) => (
               <ServiceGridCard key={service.title} service={service} index={i} />
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* One-time services for non-subscribers */}
-      <section className="py-20 lg:py-28 border-t border-white/[0.06]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-5 gap-10 lg:gap-16 items-start">
-            {/* Left - messaging */}
-            <motion.div
-              className="lg:col-span-2 lg:sticky lg:top-32"
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.7, ease: EASE }}
-            >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[oklch(0.65_0.12_170/0.15)] border border-[oklch(0.65_0.12_170/0.25)] mb-6">
-                <CheckCircle2 className="size-4 text-[oklch(0.65_0.12_170)]" />
-                <span className="text-xs font-semibold text-[oklch(0.65_0.12_170)] tracking-wide uppercase">
-                  Без абонамент
-                </span>
-              </div>
-
-              <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                Еднократни услуги
-                <br />
-                <span className="text-white/50">за всички</span>
-              </h2>
-
-              <p className="mt-5 text-white/50 text-base lg:text-lg leading-relaxed max-w-md">
-                Не е нужно да сте наши абонати. Тези услуги могат да бъдат 
-                използвани и заплатени еднократно от всяко физическо или 
-                юридическо лице.
-              </p>
-
-              <div className="mt-8 flex items-center gap-3">
-                <a
-                  href="tel:070020215"
-                  className="group flex items-center gap-2 px-6 py-3 rounded-full bg-[oklch(0.65_0.12_170)] text-[oklch(0.13_0.04_255)] font-semibold text-sm hover:brightness-110 transition-all duration-300"
-                >
-                  <Phone className="size-4" />
-                  Поръчай сега
-                  <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-                </a>
-              </div>
-            </motion.div>
-
-            {/* Right - service cards */}
-            <div className="lg:col-span-3 grid sm:grid-cols-2 gap-4">
-              {ONE_TIME_SERVICES.map((service, i) => {
-                const Icon = service.icon;
-                return (
-                  <motion.div
-                    key={service.title}
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-40px" }}
-                    transition={{
-                      duration: 0.5,
-                      delay: i * 0.08,
-                      ease: EASE,
-                    }}
-                    whileHover={{ y: -4, scale: 1.01 }}
-                    className="group relative rounded-2xl border border-[oklch(0.65_0.12_170/0.20)] bg-[oklch(0.65_0.12_170/0.06)] backdrop-blur-xl p-5 lg:p-6 transition-all duration-300 hover:border-[oklch(0.65_0.12_170/0.35)] hover:bg-[oklch(0.65_0.12_170/0.10)] hover:shadow-[0_8px_40px_rgba(100,200,170,0.06)]"
-                  >
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[oklch(0.65_0.12_170/0.04)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                    <div className="relative z-10">
-                      <div className="w-10 h-10 rounded-xl bg-[oklch(0.65_0.12_170/0.15)] flex items-center justify-center mb-4 group-hover:bg-[oklch(0.65_0.12_170/0.25)] transition-colors duration-300">
-                        <Icon className="size-5 text-[oklch(0.65_0.12_170)]" />
-                      </div>
-                      <h3 className="text-sm lg:text-base font-bold text-white mb-1.5 tracking-tight">
-                        {service.title}
-                      </h3>
-                      <p className="text-xs lg:text-sm text-white/50 leading-relaxed">
-                        {service.description}
-                      </p>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
           </div>
         </div>
       </section>
