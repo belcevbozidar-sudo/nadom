@@ -220,9 +220,9 @@ export default function DomoupravitelPage() {
         />
 
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            {/* Left - Title & CTA */}
-            <div>
+          <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
+            {/* Left - Title & CTA (60%) */}
+            <div className="lg:col-span-3">
               <motion.div
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.08] border border-white/[0.12] backdrop-blur-sm mb-8"
                 initial={{ opacity: 0, y: 20 }}
@@ -281,50 +281,60 @@ export default function DomoupravitelPage() {
               </motion.div>
             </div>
 
-            {/* Right - Services cards split into two groups */}
+            {/* Right - Services list (40%) */}
             <motion.div
               initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
-              className="space-y-8"
+              className="lg:col-span-2 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-xl p-6 lg:p-7"
             >
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-5">
+                Могат да се заплатят и индивидуално, без нужда от абонамент
+              </p>
+
               {/* Жилищни и офис сгради */}
-              <div>
-                <div className="flex items-center gap-2.5 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-white/[0.12] flex items-center justify-center">
-                    <BarChart3 className="size-4 text-white/80" />
-                  </div>
-                  <h2 className="text-sm lg:text-base font-bold text-white uppercase tracking-wide">
-                    Жилищни и офис сгради
-                  </h2>
-                </div>
-                <div className="grid grid-cols-3 gap-3">
-                  {BUILDING_SERVICES.map((s, i) => (
-                    <CompactServiceCard key={s.title} service={s} index={i} />
-                  ))}
-                </div>
-              </div>
+              <h3 className="text-xs font-bold text-white/70 uppercase tracking-wide mb-3 flex items-center gap-2">
+                <BarChart3 className="size-3.5" />
+                Жилищни и офис сгради
+              </h3>
+              <ul className="space-y-2 mb-6">
+                {BUILDING_SERVICES.map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <li
+                      key={s.title}
+                      className="flex items-center gap-3 rounded-lg bg-white/[0.06] px-4 py-2.5 transition-colors hover:bg-white/[0.10]"
+                    >
+                      <Icon className="size-4 text-white/60 shrink-0" />
+                      <span className="text-sm font-medium text-white/80">
+                        {s.title}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
 
               {/* Услуги */}
-              <div>
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-white/[0.12] flex items-center justify-center">
-                    <Wrench className="size-4 text-white/80" />
-                  </div>
-                  <h2 className="text-sm lg:text-base font-bold text-white uppercase tracking-wide">
-                    Услуги
-                  </h2>
-                </div>
-                <p className="text-xs text-white/50 mb-4 leading-relaxed">
-                  Тези услуги могат да бъдат използвани и заплатени еднократно
-                  от клиенти извън абонамент.
-                </p>
-                <div className="grid grid-cols-3 gap-3">
-                  {EXTRA_SERVICES.map((s, i) => (
-                    <CompactServiceCard key={s.title} service={s} index={i} />
-                  ))}
-                </div>
-              </div>
+              <h3 className="text-xs font-bold text-white/70 uppercase tracking-wide mb-3 flex items-center gap-2">
+                <Wrench className="size-3.5" />
+                Услуги
+              </h3>
+              <ul className="space-y-2">
+                {EXTRA_SERVICES.map((s) => {
+                  const Icon = s.icon;
+                  return (
+                    <li
+                      key={s.title}
+                      className="flex items-center gap-3 rounded-lg bg-white/[0.06] px-4 py-2.5 transition-colors hover:bg-white/[0.10]"
+                    >
+                      <Icon className="size-4 text-white/60 shrink-0" />
+                      <span className="text-sm font-medium text-white/80">
+                        {s.title}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
             </motion.div>
           </div>
         </div>
