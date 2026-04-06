@@ -20,8 +20,8 @@ export default function Index() {
       <Navbar />
       <HeroSection />
       <PropertyManagementSection />
-      <ServicesSection />
       <PropertiesSection />
+      <ServicesSection />
       <ReviewsSection />
       <ContactSection />
       <Footer />

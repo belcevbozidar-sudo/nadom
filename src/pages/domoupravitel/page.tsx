@@ -14,11 +14,6 @@ import {
   CheckCircle2,
   ArrowRight,
   Phone,
-  WrenchIcon,
-  Truck,
-  KeyRound,
-  Info,
-  FileCheck2,
 } from "lucide-react";
 import Navbar from "../_components/Navbar.tsx";
 import ContactSection from "../_components/ContactSection.tsx";
@@ -95,56 +90,12 @@ const SERVICES: ServiceCard[] = [
   },
 ];
 
-type CompactCard = {
-  icon: React.ElementType;
-  title: string;
-};
-
-const BUILDING_SERVICES: CompactCard[] = [
-  { icon: Users, title: "Проф. домоуправител" },
-  { icon: BarChart3, title: "Електронен касиер" },
-  { icon: Shield, title: "Контрол на достъпа" },
-];
-
-const EXTRA_SERVICES: CompactCard[] = [
-  { icon: WrenchIcon, title: "Ремонт и поддръжка" },
-  { icon: Truck, title: "Транспорт" },
-  { icon: KeyRound, title: "Аксесоари за входа" },
-  { icon: Info, title: "Полезна информация" },
-  { icon: FileCheck2, title: "Сделки и застраховки" },
-];
-
 const HIGHLIGHTS = [
   "15+ години професионален опит",
   "Обслужваме 500+ входа в цялата страна",
   "Прозрачно и коректно управление",
   "Онлайн достъп до документация 24/7",
 ];
-
-function CompactServiceCard({
-  service,
-  index,
-}: {
-  service: CompactCard;
-  index: number;
-}) {
-  const Icon = service.icon;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.5, delay: index * 0.07, ease: EASE }}
-      whileHover={{ y: -4, scale: 1.03 }}
-      className="group flex flex-col items-center justify-center rounded-2xl bg-white/95 backdrop-blur-sm p-5 lg:p-6 shadow-lg shadow-black/[0.04] transition-all duration-300 hover:shadow-xl hover:shadow-black/[0.08] aspect-square"
-    >
-      <Icon className="size-7 lg:size-8 text-[oklch(0.25_0.10_250)] mb-3 group-hover:scale-110 transition-transform duration-300" />
-      <span className="text-xs lg:text-sm font-bold text-[oklch(0.20_0.06_250)] text-center leading-tight">
-        {service.title}
-      </span>
-    </motion.div>
-  );
-}
 
 function ServiceGridCard({
   service,
@@ -193,7 +144,7 @@ export default function DomoupravitelPage() {
 
       <Navbar />
 
-      {/* Hero - Split: Left info + Right services */}
+      {/* Hero - Centered */}
       <section className="relative min-h-[85vh] flex items-center overflow-hidden">
         <motion.div
           className="absolute inset-0"
@@ -219,124 +170,64 @@ export default function DomoupravitelPage() {
           }}
         />
 
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
-          <div className="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
-            {/* Left - Title & CTA (60%) */}
-            <div className="lg:col-span-3">
-              <motion.div
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.08] border border-white/[0.12] backdrop-blur-sm mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
-              >
-                <Shield className="size-4 text-white/70" />
-                <span className="text-xs font-medium text-white/70 tracking-wide uppercase">
-                  Професионално управление
-                </span>
-              </motion.div>
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 text-center">
+          <motion.div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.08] border border-white/[0.12] backdrop-blur-sm mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2, ease: EASE }}
+          >
+            <Shield className="size-4 text-white/70" />
+            <span className="text-xs font-medium text-white/70 tracking-wide uppercase">
+              Професионално управление
+            </span>
+          </motion.div>
 
-              <motion.h1
-                className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight text-balance leading-[1.1]"
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9, delay: 0.35, ease: EASE }}
-              >
-                Професионален
-                <br />
-                <span className="bg-gradient-to-r from-white via-white/90 to-white/60 bg-clip-text text-transparent">
-                  Домоуправител
-                </span>
-              </motion.h1>
+          <motion.h1
+            className="text-4xl md:text-5xl lg:text-7xl font-extrabold text-white tracking-tight text-balance leading-[1.1]"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.35, ease: EASE }}
+          >
+            Професионален
+            <br />
+            <span className="bg-gradient-to-r from-white via-white/90 to-white/60 bg-clip-text text-transparent">
+              Домоуправител
+            </span>
+          </motion.h1>
 
-              <motion.p
-                className="mt-6 text-base md:text-lg text-white/60 max-w-lg leading-relaxed"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.55, ease: EASE }}
-              >
-                Грижим се за вашата сграда с прозрачност, коректност и
-                професионализъм. Пълен набор от услуги за управление на етажна собственост.
-              </motion.p>
+          <motion.p
+            className="mt-6 text-base md:text-lg text-white/60 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.55, ease: EASE }}
+          >
+            Грижим се за вашата сграда с прозрачност, коректност и
+            професионализъм. Пълен набор от услуги за управление на етажна
+            собственост.
+          </motion.p>
 
-              <motion.div
-                className="mt-8 flex flex-col sm:flex-row items-start gap-4"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.7, ease: EASE }}
-              >
-                <a
-                  href="tel:070020215"
-                  className="group flex items-center gap-3 px-7 py-3.5 rounded-full bg-white text-[oklch(0.18_0.06_250)] font-semibold text-sm hover:bg-white/90 transition-all duration-300 shadow-lg shadow-black/20"
-                >
-                  <Phone className="size-4" />
-                  Обадете се сега
-                  <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-                </a>
-                <a
-                  href="#детайли"
-                  className="px-7 py-3.5 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-all duration-300"
-                >
-                  Вижте услугите
-                </a>
-              </motion.div>
-            </div>
-
-            {/* Right - Services list (40%) */}
-            <motion.div
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
-              className="lg:col-span-2 rounded-2xl border border-white/[0.12] bg-white/[0.06] backdrop-blur-xl p-6 lg:p-7"
+          <motion.div
+            className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7, ease: EASE }}
+          >
+            <a
+              href="tel:070020215"
+              className="group flex items-center gap-3 px-7 py-3.5 rounded-full bg-white text-[oklch(0.18_0.06_250)] font-semibold text-sm hover:bg-white/90 transition-all duration-300 shadow-lg shadow-black/20"
             >
-              <p className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-5">
-                Могат да се заплатят и индивидуално, без нужда от абонамент
-              </p>
-
-              {/* Жилищни и офис сгради */}
-              <h3 className="text-xs font-bold text-white/70 uppercase tracking-wide mb-3 flex items-center gap-2">
-                <BarChart3 className="size-3.5" />
-                Жилищни и офис сгради
-              </h3>
-              <ul className="space-y-2 mb-6">
-                {BUILDING_SERVICES.map((s) => {
-                  const Icon = s.icon;
-                  return (
-                    <li
-                      key={s.title}
-                      className="flex items-center gap-3 rounded-lg bg-white/[0.06] px-4 py-2.5 transition-colors hover:bg-white/[0.10]"
-                    >
-                      <Icon className="size-4 text-white/60 shrink-0" />
-                      <span className="text-sm font-medium text-white/80">
-                        {s.title}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              {/* Услуги */}
-              <h3 className="text-xs font-bold text-white/70 uppercase tracking-wide mb-3 flex items-center gap-2">
-                <Wrench className="size-3.5" />
-                Услуги
-              </h3>
-              <ul className="space-y-2">
-                {EXTRA_SERVICES.map((s) => {
-                  const Icon = s.icon;
-                  return (
-                    <li
-                      key={s.title}
-                      className="flex items-center gap-3 rounded-lg bg-white/[0.06] px-4 py-2.5 transition-colors hover:bg-white/[0.10]"
-                    >
-                      <Icon className="size-4 text-white/60 shrink-0" />
-                      <span className="text-sm font-medium text-white/80">
-                        {s.title}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </motion.div>
-          </div>
+              <Phone className="size-4" />
+              Обадете се сега
+              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a
+              href="#детайли"
+              className="px-7 py-3.5 rounded-full border border-white/20 text-white font-semibold text-sm hover:bg-white/10 transition-all duration-300"
+            >
+              Вижте услугите
+            </a>
+          </motion.div>
         </div>
       </section>
 
@@ -364,7 +255,10 @@ export default function DomoupravitelPage() {
       </section>
 
       {/* Detailed services grid */}
-      <section id="детайли" className="py-20 lg:py-28 border-t border-white/[0.06]">
+      <section
+        id="детайли"
+        className="py-20 lg:py-28 border-t border-white/[0.06]"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             className="text-center mb-16"
@@ -377,14 +271,18 @@ export default function DomoupravitelPage() {
               Какво включва услугата
             </h2>
             <p className="mt-4 text-white/50 max-w-2xl mx-auto text-base lg:text-lg">
-              Пълен пакет от професионални услуги за безпроблемно управление
-              на вашата етажна собственост
+              Пълен пакет от професионални услуги за безпроблемно управление на
+              вашата етажна собственост
             </p>
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {SERVICES.map((service, i) => (
-              <ServiceGridCard key={service.title} service={service} index={i} />
+              <ServiceGridCard
+                key={service.title}
+                service={service}
+                index={i}
+              />
             ))}
           </div>
         </div>
@@ -408,8 +306,8 @@ export default function DomoupravitelPage() {
                 Готови ли сте за професионално управление?
               </h2>
               <p className="text-white/50 max-w-xl mx-auto mb-8 text-base lg:text-lg">
-                Свържете се с нас за безплатна консултация и оферта, 
-                съобразена с нуждите на вашата сграда.
+                Свържете се с нас за безплатна консултация и оферта, съобразена с
+                нуждите на вашата сграда.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a
