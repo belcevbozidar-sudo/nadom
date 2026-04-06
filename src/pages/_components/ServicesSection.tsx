@@ -103,6 +103,9 @@ export default function ServicesSection() {
           <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
             ВСИЧКО ЗА ВАШАТА СГРАДА
           </h2>
+          <p className="mt-3 text-white/55 text-base lg:text-lg">
+            Опис на всички предлагани услуги от фирмата
+          </p>
           <motion.div
             className="w-16 h-1 bg-white mt-4 rounded-full origin-left"
             initial={{ scaleX: 0 }}

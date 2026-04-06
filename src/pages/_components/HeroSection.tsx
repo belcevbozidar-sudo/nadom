@@ -1,19 +1,113 @@
 import { motion } from "motion/react";
-import { CheckCircle2 } from "lucide-react";
+import {
+  Scale,
+  Users,
+  FileText,
+  Wrench,
+  BarChart3,
+  FileSignature,
+  MapPinned,
+  Landmark,
+  GitFork,
+  BadgeDollarSign,
+  ArrowRight,
+  Building2,
+  Briefcase,
+} from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
+import { Textarea } from "@/components/ui/textarea.tsx";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
-const FEATURES = [
-  "Професионален домоуправител",
-  "Електронен касиер",
-  "Почистване на жилищни сгради",
-  "Общи събрания",
-  "Технически паспорт и енергийна ефективност",
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+const DOMOUPRAVITEL_SERVICES = [
+  { icon: Scale, label: "Правно представителство" },
+  { icon: Users, label: "Общи събрания" },
+  { icon: FileText, label: "Документация и протоколи" },
+  { icon: Wrench, label: "Поддръжка на инсталации" },
+  { icon: BarChart3, label: "Финансово управление" },
 ];
 
-// Smooth entrance ease
-const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+const ADMIN_SERVICES = [
+  { icon: FileSignature, label: "Изготвяне на документи" },
+  { icon: MapPinned, label: "Скици и удостоверения" },
+  { icon: Landmark, label: "Представяне пред институции" },
+  { icon: GitFork, label: "Делби и продажби" },
+  { icon: BadgeDollarSign, label: "Завещания и дарения" },
+];
+
+const inputClass =
+  "bg-white/[0.08] border-white/15 text-white placeholder:text-white/40 h-11 rounded-xl focus-visible:ring-white/30 text-sm";
+
+type ServicePanelProps = {
+  title: string;
+  icon: React.ElementType;
+  services: { icon: React.ElementType; label: string }[];
+  href: string;
+  direction: "left" | "right";
+  delay: number;
+};
+
+function ServicePanel({
+  title,
+  icon: HeaderIcon,
+  services,
+  href,
+  direction,
+  delay,
+}: ServicePanelProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: direction === "left" ? -60 : 60 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.8, delay, ease: EASE }}
+    >
+      <Link to={href} className="block group">
+        <div className="bg-white/[0.07] backdrop-blur-2xl border border-white/15 rounded-2xl p-5 lg:p-6 transition-all duration-300 hover:bg-white/[0.12] hover:border-white/25 h-full">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0">
+              <HeaderIcon className="size-4.5 text-white" />
+            </div>
+            <h3 className="text-xs lg:text-sm font-bold text-white uppercase tracking-wide leading-tight">
+              {title}
+            </h3>
+          </div>
+
+          <ul className="space-y-2">
+            {services.map((s, i) => {
+              const Icon = s.icon;
+              return (
+                <motion.li
+                  key={s.label}
+                  initial={{ opacity: 0, x: direction === "left" ? -20 : 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{
+                    duration: 0.4,
+                    delay: delay + 0.15 + i * 0.08,
+                    ease: EASE,
+                  }}
+                  className="flex items-center gap-3 rounded-lg bg-white/[0.05] px-3 py-2 transition-colors group-hover:bg-white/[0.08]"
+                >
+                  <Icon className="size-3.5 text-white/50 shrink-0" />
+                  <span className="text-xs lg:text-sm font-medium text-white/75 group-hover:text-white/90 transition-colors">
+                    {s.label}
+                  </span>
+                </motion.li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-4 flex items-center gap-2 text-white/45 group-hover:text-white/80 text-xs font-semibold transition-colors">
+            Научете повече
+            <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
 
 export default function HeroSection() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,82 +125,142 @@ export default function HeroSection() {
         className="absolute inset-0"
         initial={{ scale: 1.15 }}
         animate={{ scale: 1 }}
-        transition={{ duration: 2.5, ease: EASE_OUT_EXPO }}
+        transition={{ duration: 2.5, ease: EASE }}
       >
         <img
           src="https://images.unsplash.com/photo-1757780993465-7f1923296763?w=1920&q=80"
           alt="Модерна жилищна сграда"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.12_0.05_255/0.95)] via-[oklch(0.12_0.05_255/0.80)] to-[oklch(0.12_0.05_255/0.55)]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.10_0.04_255/0.96)] via-[oklch(0.10_0.04_255/0.88)] to-[oklch(0.10_0.04_255/0.70)]" />
       </motion.div>
 
       {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Form card - slides in from left with spring */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20 w-full">
+        {/* 3-column layout */}
+        <div className="grid lg:grid-cols-[1fr_1.15fr_1fr] gap-5 lg:gap-6 items-start">
+          {/* Left - Професионален Домоуправител */}
+          <div className="hidden lg:block">
+            <ServicePanel
+              title="Професионален Домоуправител"
+              icon={Building2}
+              services={DOMOUPRAVITEL_SERVICES}
+              href="/domoupravitel"
+              direction="left"
+              delay={0.3}
+            />
+          </div>
+
+          {/* Center - Form */}
           <motion.div
-            initial={{ opacity: 0, x: -80, rotateY: 8 }}
-            animate={{ opacity: 1, x: 0, rotateY: 0 }}
-            transition={{
-              duration: 1,
-              delay: 0.2,
-              ease: EASE_OUT_EXPO,
-            }}
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.2, ease: EASE }}
           >
             <motion.div
-              className="bg-white/[0.07] backdrop-blur-2xl border border-white/15 rounded-2xl p-8 lg:p-10 shadow-2xl"
+              className="bg-white/[0.07] backdrop-blur-2xl border border-white/15 rounded-2xl p-6 lg:p-7 shadow-2xl"
               whileHover={{ boxShadow: "0 30px 60px -15px rgba(0,0,0,0.4)" }}
               transition={{ duration: 0.3 }}
             >
               <motion.h2
-                className="text-3xl font-extrabold text-white mb-2 tracking-tight"
+                className="text-2xl lg:text-3xl font-extrabold text-white mb-1 tracking-tight text-center"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
               >
                 Вземете оферта
               </motion.h2>
               <motion.p
-                className="text-white/60 mb-8 text-sm leading-relaxed"
+                className="text-white/50 mb-5 text-xs text-center leading-relaxed"
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
               >
-                Офертата ще Ви бъде отправена след попълване на съответните данни.
+                Попълнете данните и ще Ви изпратим оферта
               </motion.p>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {[
-                    { placeholder: "Име и фамилия", type: "text", delay: 0.65 },
-                    { placeholder: "Е-поща", type: "email", delay: 0.72 },
-                    { placeholder: "Телефонен номер", type: "tel", delay: 0.79 },
-                    { placeholder: "Област", type: "text", delay: 0.86 },
-                  ].map((input) => (
-                    <motion.div
-                      key={input.placeholder}
-                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      transition={{ duration: 0.5, delay: input.delay }}
-                    >
-                      <Input
-                        placeholder={input.placeholder}
-                        type={input.type}
-                        aria-label={input.placeholder}
-                        className="bg-white/[0.08] border-white/15 text-white placeholder:text-white/40 h-12 rounded-xl focus-visible:ring-white/30"
-                      />
-                    </motion.div>
-                  ))}
-                </div>
+
+              <form onSubmit={handleSubmit} className="space-y-3">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.95 }}
+                  transition={{ duration: 0.4, delay: 0.55 }}
+                >
+                  <Input
+                    placeholder="Име и фамилия"
+                    type="text"
+                    aria-label="Име и фамилия"
+                    className={inputClass}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.6 }}
+                >
+                  <Input
+                    placeholder="Услуга"
+                    type="text"
+                    aria-label="Услуга"
+                    className={inputClass}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.65 }}
+                >
+                  <Input
+                    placeholder="Адрес"
+                    type="text"
+                    aria-label="Адрес"
+                    className={inputClass}
+                  />
+                </motion.div>
+
+                <motion.div
+                  className="grid grid-cols-2 gap-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.7 }}
+                >
+                  <Input
+                    placeholder="Област"
+                    type="text"
+                    aria-label="Област"
+                    className={inputClass}
+                  />
+                  <Input
+                    placeholder="Тип сграда"
+                    type="text"
+                    aria-label="Тип сграда"
+                    className={inputClass}
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.75 }}
+                >
+                  <Textarea
+                    placeholder="Съобщение"
+                    aria-label="Съобщение"
+                    rows={3}
+                    className="bg-white/[0.08] border-white/15 text-white placeholder:text-white/40 rounded-xl focus-visible:ring-white/30 text-sm min-h-[72px]"
+                  />
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: 0.8 }}
                 >
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full text-base font-bold h-13 rounded-xl mt-2"
+                    className="w-full text-sm font-bold h-12 rounded-xl mt-1"
                   >
                     ВЗЕМЕТЕ ОФЕРТА
                   </Button>
@@ -115,75 +269,37 @@ export default function HeroSection() {
             </motion.div>
           </motion.div>
 
-          {/* Brand + features - slides in from right */}
-          <motion.div
-            initial={{ opacity: 0, x: 80 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1, delay: 0.3, ease: EASE_OUT_EXPO }}
-            className="space-y-10"
-          >
-            <div>
-              <motion.p
-                className="text-white/50 text-xs uppercase tracking-[0.25em] mb-3 font-semibold"
-                initial={{ opacity: 0, letterSpacing: "0.5em" }}
-                animate={{ opacity: 1, letterSpacing: "0.25em" }}
-                transition={{ duration: 0.8, delay: 0.5 }}
-              >
-                Национална Агенция
-              </motion.p>
-              <motion.h1
-                className="text-5xl lg:text-7xl font-extrabold text-white tracking-tight leading-none"
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4, ease: EASE_OUT_EXPO }}
-              >
-                ДОМО
-                <br />
-                <motion.span
-                  className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent inline-block"
-                  initial={{ opacity: 0, x: 30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: 0.6, ease: EASE_OUT_EXPO }}
-                >
-                  УПРАВИТЕЛ
-                </motion.span>
-              </motion.h1>
-            </div>
+          {/* Right - Административни Услуги */}
+          <div className="hidden lg:block">
+            <ServicePanel
+              title="Административни Услуги"
+              icon={Briefcase}
+              services={ADMIN_SERVICES}
+              href="/administrativni-uslugi"
+              direction="right"
+              delay={0.3}
+            />
+          </div>
 
-            <div className="space-y-4">
-              {FEATURES.map((feature, i) => (
-                <motion.div
-                  key={feature}
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{
-                    duration: 0.5,
-                    delay: 0.7 + i * 0.12,
-                    ease: EASE_OUT_EXPO,
-                  }}
-                  whileHover={{ x: 6 }}
-                  className="flex items-center gap-3.5"
-                >
-                  <motion.div
-                    className="w-7 h-7 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 400,
-                      damping: 15,
-                      delay: 0.8 + i * 0.12,
-                    }}
-                  >
-                    <CheckCircle2 className="size-4 text-emerald-400" />
-                  </motion.div>
-                  <span className="text-white/85 text-base lg:text-lg font-medium">
-                    {feature}
-                  </span>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+          {/* Mobile: Show both panels below form */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:hidden">
+            <ServicePanel
+              title="Професионален Домоуправител"
+              icon={Building2}
+              services={DOMOUPRAVITEL_SERVICES}
+              href="/domoupravitel"
+              direction="left"
+              delay={0.5}
+            />
+            <ServicePanel
+              title="Административни Услуги"
+              icon={Briefcase}
+              services={ADMIN_SERVICES}
+              href="/administrativni-uslugi"
+              direction="right"
+              delay={0.6}
+            />
+          </div>
         </div>
       </div>
 
