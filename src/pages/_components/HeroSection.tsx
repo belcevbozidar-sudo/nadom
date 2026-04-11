@@ -23,19 +23,19 @@ import { toast } from "sonner";
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 const DOMOUPRAVITEL_SERVICES = [
-  { icon: Scale, label: "Правно представителство" },
-  { icon: Users, label: "Общи събрания" },
-  { icon: FileText, label: "Документация и протоколи" },
-  { icon: Wrench, label: "Поддръжка на инсталации" },
-  { icon: BarChart3, label: "Финансово управление" },
+  { icon: Scale, label: "Legal Representation" },
+  { icon: Users, label: "General Meetings" },
+  { icon: FileText, label: "Documentation & Minutes" },
+  { icon: Wrench, label: "Facility Maintenance" },
+  { icon: BarChart3, label: "Financial Management" },
 ];
 
 const ADMIN_SERVICES = [
-  { icon: FileSignature, label: "Изготвяне на документи" },
-  { icon: MapPinned, label: "Скици и удостоверения" },
-  { icon: Landmark, label: "Представяне пред институции" },
-  { icon: GitFork, label: "Делби и продажби" },
-  { icon: BadgeDollarSign, label: "Завещания и дарения" },
+  { icon: FileSignature, label: "Document Preparation" },
+  { icon: MapPinned, label: "Surveys & Certificates" },
+  { icon: Landmark, label: "Institutional Representation" },
+  { icon: GitFork, label: "Divisions & Sales" },
+  { icon: BadgeDollarSign, label: "Wills & Donations" },
 ];
 
 const inputClass =
@@ -100,7 +100,7 @@ function ServicePanel({
           </ul>
 
           <div className="mt-4 flex items-center gap-2 text-white/45 group-hover:text-white/80 text-xs font-semibold transition-colors">
-            Научете повече
+            Learn more
             <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </div>
@@ -112,12 +112,12 @@ function ServicePanel({
 export default function HeroSection() {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success("Благодарим! Ще се свържем с вас скоро.");
+    toast.success("Thank you! We will contact you soon.");
   };
 
   return (
     <section
-      id="начало"
+      id="home"
       className="relative min-h-[92vh] flex items-center overflow-hidden"
     >
       {/* Background image with zoom animation */}
@@ -129,7 +129,7 @@ export default function HeroSection() {
       >
         <img
           src="https://images.unsplash.com/photo-1757780993465-7f1923296763?w=1920&q=80"
-          alt="Модерна жилищна сграда"
+          alt="Modern residential building"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.10_0.04_255/0.96)] via-[oklch(0.10_0.04_255/0.88)] to-[oklch(0.10_0.04_255/0.70)]" />
@@ -142,7 +142,7 @@ export default function HeroSection() {
           {/* Left - Професионален Домоуправител */}
           <div className="hidden lg:block">
             <ServicePanel
-              title="Професионален Домоуправител"
+              title="Professional Property Manager"
               icon={Building2}
               services={DOMOUPRAVITEL_SERVICES}
               href="/domoupravitel"
@@ -168,7 +168,7 @@ export default function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                Вземете оферта
+                Get a Quote
               </motion.h2>
               <motion.p
                 className="text-white/50 mb-5 text-xs text-center leading-relaxed"
@@ -176,7 +176,7 @@ export default function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
-                Попълнете данните и ще Ви изпратим оферта
+                Fill in the details and we will send you a quote
               </motion.p>
 
               <form onSubmit={handleSubmit} className="space-y-3">
@@ -186,9 +186,9 @@ export default function HeroSection() {
                   transition={{ duration: 0.4, delay: 0.55 }}
                 >
                   <Input
-                    placeholder="Име и фамилия"
+                    placeholder="Full Name"
                     type="text"
-                    aria-label="Име и фамилия"
+                    aria-label="Full Name"
                     className={inputClass}
                   />
                 </motion.div>
@@ -199,9 +199,9 @@ export default function HeroSection() {
                   transition={{ duration: 0.4, delay: 0.6 }}
                 >
                   <Input
-                    placeholder="Услуга"
+                    placeholder="Service"
                     type="text"
-                    aria-label="Услуга"
+                    aria-label="Service"
                     className={inputClass}
                   />
                 </motion.div>
@@ -212,9 +212,9 @@ export default function HeroSection() {
                   transition={{ duration: 0.4, delay: 0.65 }}
                 >
                   <Input
-                    placeholder="Адрес"
+                    placeholder="Address"
                     type="text"
-                    aria-label="Адрес"
+                    aria-label="Address"
                     className={inputClass}
                   />
                 </motion.div>
@@ -226,15 +226,15 @@ export default function HeroSection() {
                   transition={{ duration: 0.4, delay: 0.7 }}
                 >
                   <Input
-                    placeholder="Област"
+                    placeholder="Region"
                     type="text"
-                    aria-label="Област"
+                    aria-label="Region"
                     className={inputClass}
                   />
                   <Input
-                    placeholder="Тип сграда"
+                    placeholder="Building Type"
                     type="text"
-                    aria-label="Тип сграда"
+                    aria-label="Building Type"
                     className={inputClass}
                   />
                 </motion.div>
@@ -245,8 +245,8 @@ export default function HeroSection() {
                   transition={{ duration: 0.4, delay: 0.75 }}
                 >
                   <Textarea
-                    placeholder="Съобщение"
-                    aria-label="Съобщение"
+                    placeholder="Message"
+                    aria-label="Message"
                     rows={3}
                     className="bg-white/[0.08] border-white/15 text-white placeholder:text-white/40 rounded-xl focus-visible:ring-white/30 text-sm min-h-[72px]"
                   />
@@ -262,7 +262,7 @@ export default function HeroSection() {
                     size="lg"
                     className="w-full text-sm font-bold h-12 rounded-xl mt-1"
                   >
-                    ВЗЕМЕТЕ ОФЕРТА
+                    GET A QUOTE
                   </Button>
                 </motion.div>
               </form>
@@ -272,7 +272,7 @@ export default function HeroSection() {
           {/* Right - Административни Услуги */}
           <div className="hidden lg:block">
             <ServicePanel
-              title="Административни Услуги"
+              title="Administrative Services"
               icon={Briefcase}
               services={ADMIN_SERVICES}
               href="/administrativni-uslugi"
@@ -284,7 +284,7 @@ export default function HeroSection() {
           {/* Mobile: Show both panels below form */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:hidden">
             <ServicePanel
-              title="Професионален Домоуправител"
+              title="Professional Property Manager"
               icon={Building2}
               services={DOMOUPRAVITEL_SERVICES}
               href="/domoupravitel"
@@ -292,7 +292,7 @@ export default function HeroSection() {
               delay={0.5}
             />
             <ServicePanel
-              title="Административни Услуги"
+              title="Administrative Services"
               icon={Briefcase}
               services={ADMIN_SERVICES}
               href="/administrativni-uslugi"
