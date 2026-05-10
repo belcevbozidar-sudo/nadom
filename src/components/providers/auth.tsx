@@ -1,10 +1,17 @@
 import { HerculesAuthProvider } from "@usehercules/auth/react";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const authority = import.meta.env.VITE_HERCULES_OIDC_AUTHORITY;
+  const clientId = import.meta.env.VITE_HERCULES_OIDC_CLIENT_ID;
+
+  if (!authority || !clientId) {
+    return <>{children}</>;
+  }
+
   return (
     <HerculesAuthProvider
-      authority={import.meta.env.VITE_HERCULES_OIDC_AUTHORITY!}
-      client_id={import.meta.env.VITE_HERCULES_OIDC_CLIENT_ID!}
+      authority={authority}
+      client_id={clientId}
       userManagerSettings={{
         prompt: import.meta.env.VITE_HERCULES_OIDC_PROMPT ?? "select_account",
         response_type:
