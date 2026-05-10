@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { SignInButton } from "@/components/ui/signin.tsx";
 import ReviewDialog from "./ReviewDialog.tsx";
 
+const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
+
 function StarDisplay({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5">
@@ -27,6 +29,26 @@ function StarDisplay({ rating }: { rating: number }) {
 }
 
 function ReviewsContent() {
+  if (!HAS_CONVEX_BACKEND) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="rounded-2xl border border-white/10 bg-white/5 px-6 py-10 text-center"
+      >
+        <Quote className="size-10 text-white/20 mx-auto mb-4" />
+        <p className="text-white/60">
+          Отзивите ще бъдат активирани след свързване на базата данни.
+        </p>
+      </motion.div>
+    );
+  }
+
+  return <LiveReviewsContent />;
+}
+
+function LiveReviewsContent() {
   const reviews = useQuery(api.reviews.getVisibleReviews, {});
   const [dialogOpen, setDialogOpen] = useState(false);
 

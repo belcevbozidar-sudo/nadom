@@ -60,6 +60,7 @@ const MAX_ATTEMPTS = 3;
 const LOCKOUT_MS = 60 * 60 * 1000; // 60 minutes
 const STORAGE_KEY_REMEMBER = "nadom_admin_remember";
 const STORAGE_KEY_LOCKOUT = "nadom_admin_lockout";
+const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 
 type AdminSubmission = StoredSubmission;
 type AdminService = StoredService;
@@ -263,7 +264,46 @@ function getPageLabel(page: string): string {
   return page;
 }
 
+function OfflineBackendNotice({
+  icon,
+  title,
+}: {
+  icon: React.ReactNode;
+  title: string;
+}) {
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-white flex items-center gap-2">
+        {icon}
+        {title}
+      </h2>
+      <Card className="border-white/10 bg-white/5 backdrop-blur-md">
+        <CardContent className="py-12 text-center">
+          <ShieldAlert className="size-10 text-white/20 mx-auto mb-3" />
+          <p className="text-white/60 max-w-xl mx-auto">
+            Тази част се включва, когато сайтът е свързан с база данни. Услугите,
+            имотите и подадените форми работят веднага в този админ панел.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function SessionsPanel() {
+  if (!HAS_CONVEX_BACKEND) {
+    return (
+      <OfflineBackendNotice
+        icon={<BarChart3 className="size-5" />}
+        title="Сесии"
+      />
+    );
+  }
+
+  return <LiveSessionsPanel />;
+}
+
+function LiveSessionsPanel() {
   const [selectedDays, setSelectedDays] = useState<number>(7);
   const data = useQuery(api.analytics.getSessionCount, {
     days: selectedDays,
@@ -374,6 +414,19 @@ function SessionsPanel() {
 // ── Reviews management panel ───────────────────────────────────
 
 function ReviewsPanel() {
+  if (!HAS_CONVEX_BACKEND) {
+    return (
+      <OfflineBackendNotice
+        icon={<MessageSquare className="size-5" />}
+        title="Управление на ревюта"
+      />
+    );
+  }
+
+  return <LiveReviewsPanel />;
+}
+
+function LiveReviewsPanel() {
   const reviews = useQuery(api.reviews.getAllReviews, {});
   const toggleVisibility = useMutation(api.reviews.toggleVisibility);
   const deleteReview = useMutation(api.reviews.deleteReview);

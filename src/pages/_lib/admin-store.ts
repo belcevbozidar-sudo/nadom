@@ -46,7 +46,7 @@ function defaultStore(): AdminStore {
   };
 }
 
-function readStore(): AdminStore {
+function loadStore(): AdminStore {
   if (typeof window === "undefined") return defaultStore();
 
   try {
@@ -74,18 +74,33 @@ function readStore(): AdminStore {
   }
 }
 
+let storeCache: AdminStore | null = null;
+
+function readStore(): AdminStore {
+  if (storeCache === null) {
+    storeCache = loadStore();
+  }
+  return storeCache;
+}
+
 function writeStore(updater: (current: AdminStore) => AdminStore) {
   const next = updater(readStore());
+  storeCache = next;
   localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   window.dispatchEvent(new Event(STORE_EVENT));
 }
 
 function subscribe(callback: () => void) {
+  const handleStorage = () => {
+    storeCache = loadStore();
+    callback();
+  };
+
   window.addEventListener(STORE_EVENT, callback);
-  window.addEventListener("storage", callback);
+  window.addEventListener("storage", handleStorage);
   return () => {
     window.removeEventListener(STORE_EVENT, callback);
-    window.removeEventListener("storage", callback);
+    window.removeEventListener("storage", handleStorage);
   };
 }
 

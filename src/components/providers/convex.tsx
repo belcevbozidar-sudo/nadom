@@ -4,10 +4,14 @@ import {
   ConvexReactClient,
 } from "convex/react";
 
-const convexUrl = import.meta.env.VITE_CONVEX_URL ?? "http://localhost:3000";
-const convex = new ConvexReactClient(convexUrl);
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
+const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
 
 export function ConvexProvider({ children }: { children: React.ReactNode }) {
+  if (!convex) {
+    return <>{children}</>;
+  }
+
   const hasHerculesAuth =
     Boolean(import.meta.env.VITE_HERCULES_OIDC_AUTHORITY) &&
     Boolean(import.meta.env.VITE_HERCULES_OIDC_CLIENT_ID);

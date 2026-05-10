@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth.ts";
 import { Button, buttonVariants } from "@/components/ui/button.tsx";
 
+const AUTH_ENABLED =
+  Boolean(import.meta.env.VITE_HERCULES_OIDC_AUTHORITY) &&
+  Boolean(import.meta.env.VITE_HERCULES_OIDC_CLIENT_ID);
+
 export interface SignInButtonProps
   extends
     Omit<React.ComponentProps<"button">, "onClick">,
@@ -61,6 +65,10 @@ export const SignInButton = forwardRef<HTMLButtonElement, SignInButtonProps>(
     },
     ref,
   ) => {
+    if (!AUTH_ENABLED) {
+      return null;
+    }
+
     const { isAuthenticated, signinRedirect, removeUser, isLoading, error } =
       useAuth();
 
