@@ -1,5 +1,6 @@
 export type Property = {
   id: string;
+  slug?: string;
   type: string;
   title: string;
   location: string;
@@ -12,6 +13,8 @@ export type Property = {
   description: string;
   image: string;
   gallery: string[];
+  order?: number;
+  isVisible?: boolean;
 };
 
 export const PROPERTIES: Property[] = [
@@ -28,7 +31,8 @@ export const PROPERTIES: Property[] = [
     phone: "0876 590 580",
     description:
       "НАДОМ-Недвижими имоти представя просторен тристаен апартамент за продажба в центъра на Велико Търново. Имотът разполага с две спални, хол, кухня и баня. Разположен е на тих етаж с прекрасна панорама към Царевец. Сградата е с отлична поддръжка и контролиран достъп.",
-    image: "https://images.unsplash.com/photo-1618955599800-3d63a871e0be?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1618955599800-3d63a871e0be?w=800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1618955599800-3d63a871e0be?w=400&q=80",
       "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80",
@@ -49,7 +53,8 @@ export const PROPERTIES: Property[] = [
     phone: "0876 590 580",
     description:
       "НАДОМ-Недвижими имоти представя уютен тристаен апартамент в квартал Бузлуджа. Имотът е с две спални, хол с кухненски бокс, баня и тоалетна. Сградата е с обновена фасада и нов асансьор. Близо до училище, детска градина и паркова зона.",
-    image: "https://images.unsplash.com/photo-1614962599546-d829f8e54d6f?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1614962599546-d829f8e54d6f?w=800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1614962599546-d829f8e54d6f?w=400&q=80",
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80",
@@ -70,7 +75,8 @@ export const PROPERTIES: Property[] = [
     phone: "0876 590 580",
     description:
       "НАДОМ-Недвижими имоти представя инвестиционен имот за продажба. Локацията на имота позволява да се използва за търговска дейност, като е разположен на главен път София- Варна. Стара къща 86 кв.м.",
-    image: "https://images.unsplash.com/photo-1763640793952-827c3a3f5918?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1763640793952-827c3a3f5918?w=800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1763640793952-827c3a3f5918?w=400&q=80",
       "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=400&q=80",
@@ -91,7 +97,8 @@ export const PROPERTIES: Property[] = [
     phone: "0876 590 580",
     description:
       "НАДОМ-Недвижими имоти представя луксозна къща за продажба в Средни Колиби. Имотът разполага с просторен двор, гараж за два автомобила, пет спални, три бани и панорамна гледка към Стара Планина. Къщата е с висок клас довършителни работи.",
-    image: "https://images.unsplash.com/photo-1694184888776-7528df6e0f3a?w=800&q=80",
+    image:
+      "https://images.unsplash.com/photo-1694184888776-7528df6e0f3a?w=800&q=80",
     gallery: [
       "https://images.unsplash.com/photo-1694184888776-7528df6e0f3a?w=400&q=80",
       "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80",
@@ -100,3 +107,18 @@ export const PROPERTIES: Property[] = [
     ],
   },
 ];
+
+export type EditableProperty = Omit<Property, "id"> & {
+  slug: string;
+  order: number;
+  isVisible: boolean;
+};
+
+export const DEFAULT_PROPERTIES: EditableProperty[] = PROPERTIES.map(
+  ({ id, ...property }, index) => ({
+    ...property,
+    slug: id,
+    order: index + 1,
+    isVisible: true,
+  }),
+);

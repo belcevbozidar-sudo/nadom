@@ -1,75 +1,13 @@
 import { motion } from "motion/react";
-import {
-  FileText,
-  ScrollText,
-  MapPinned,
-  Landmark,
-  GitFork,
-  BadgeDollarSign,
-  FileSignature,
-  Gift,
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card.tsx";
 import Navbar from "../_components/Navbar.tsx";
 import Footer from "../_components/Footer.tsx";
+import { getServiceIcon } from "../_lib/content-icons.ts";
+import { useAdminStore } from "../_lib/admin-store.ts";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
-
-const ROW_1_SERVICES = [
-  {
-    icon: FileText,
-    title: "Консултации за изготвяне на документи",
-    description:
-      "Нашите юристи ще Ви консултират относно видовете сделки с имоти (продажба, дарение, делба или отдаване под наем и др.), ще подготвят необходимите документи, включително и предварителен договор за продажба, договори за наем, делба или дарение на недвижими имоти, както и ще набавят всички нужни за сделката документи.",
-  },
-  {
-    icon: ScrollText,
-    title: "Снабдяване с акт за имот без документ",
-    description:
-      "Извършваме тази услуга, която ние ще подпомогнем целият процес по снабдяването на нашите клиенти с акт за имот без документи. Нашите юристи ще Ви консултират и съдействат за извършване на конкретните нотариални дейности по озаконяването на Вашия документ.",
-  },
-  {
-    icon: MapPinned,
-    title: "Снабдяване със скици, нотариална оценка, удостоверения и др.",
-    description:
-      "Според нуждите на нашите клиенти извършваме заявление и получаване на скица за имот или сграда в урбанизирана територия от Агенцията по кадастър и Общината. Нашият екип ще се погрижи за всичко, което Ви е необходимо относно документацията на Вашият имот или сграда.",
-  },
-  {
-    icon: Landmark,
-    title: "Представяне пред институции",
-    description:
-      "Екипът на НАДОМ се състои от образовани хора, сред които юристи и имотни консултанти, имащи нужните качества, за да Ви представляват пред различни институции. Упълномощавайки наш служител, той ще Ви представлява пред всички държавни, общински служби и различни институции, като НАП, Агенция по кадастър, Данъчна служба, МВР, КАТ и др.",
-  },
-];
-
-const ROW_2_SERVICES = [
-  {
-    icon: GitFork,
-    title: "Делби",
-    description:
-      "Нашите работещи в НАДОМ изготвят всички видове договори за делба, както и всички последващи документи свързани със сделката за делбата. Нашите специалисти ще Ви консултират и подпомогнат процесът на делбата за имущество да премине бързо и безпроблемно за всички съсобственици.",
-  },
-  {
-    icon: BadgeDollarSign,
-    title: "Продажба",
-    description:
-      "Нашите служители ще съдействат за продажбата или отдаването под наем на притежаваните от Вас имоти, като срещу минимална комисиона се ангажираме да получите желаната от Вас продажна или наемна цена, без досадни огледи и ангажименти с купувачи или наематели. Основна идея е да предлагаме имоти на наши клиенти, които не са обявени в други агенции за недвижими имоти.",
-  },
-  {
-    icon: FileSignature,
-    title: "Завещания",
-    description:
-      "Изготвяне на нотариални завещания и всички видове документи свързани с него. Нашите юристи ще Ви помогнат да депозирате завещанието пред нотариус. Ако в него има и недвижими имоти е необходимо представяне на копия от документите за собственост на завещаваните недвижими имоти, както и данъчни оценки и скици или схеми на същите имоти.",
-  },
-  {
-    icon: Gift,
-    title: "Дарения",
-    description:
-      "Нашите юристи се занимават с изготвянето на договори за дарения, както на физически, така и на юридически лица. С договора за дарение дарителят отстъпва веднага и безвъзмездно различно движимо или недвижимо имущество на дарения, който го приема. По правило този договор е безвъзмезден.",
-  },
-];
 
 const stagger = {
   hidden: {},
@@ -87,6 +25,15 @@ const cardVariant = {
 };
 
 export default function AdminServicesPage() {
+  const { services } = useAdminStore();
+  const adminServices = services
+    .filter((service) => service.isVisible)
+    .filter((service) => service.category === "admin_services")
+    .sort((a, b) => a.order - b.order);
+  const midpoint = Math.ceil(adminServices.length / 2);
+  const row1Services = adminServices.slice(0, midpoint);
+  const row2Services = adminServices.slice(midpoint);
+
   return (
     <div className="min-h-screen relative">
       {/* Fixed gradient background */}
@@ -202,7 +149,7 @@ export default function AdminServicesPage() {
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
           >
-            {ROW_1_SERVICES.map((svc) => (
+            {row1Services.map((svc) => (
               <motion.div key={svc.title} variants={cardVariant}>
                 <ServiceCard
                   icon={svc.icon}
@@ -225,7 +172,7 @@ export default function AdminServicesPage() {
             whileInView="visible"
             viewport={{ once: true, margin: "-60px" }}
           >
-            {ROW_2_SERVICES.map((svc) => (
+            {row2Services.map((svc) => (
               <motion.div key={svc.title} variants={cardVariant}>
                 <ServiceCard
                   icon={svc.icon}
@@ -244,14 +191,15 @@ export default function AdminServicesPage() {
 }
 
 function ServiceCard({
-  icon: Icon,
+  icon,
   title,
   description,
 }: {
-  icon: typeof FileText;
+  icon: string;
   title: string;
   description: string;
 }) {
+  const IconComponent = getServiceIcon(icon);
   return (
     <motion.div
       whileHover={{ y: -6, scale: 1.02 }}
@@ -263,7 +211,7 @@ function ServiceCard({
           whileHover={{ rotate: 8, scale: 1.1 }}
           transition={{ type: "spring", stiffness: 300, damping: 12 }}
         >
-          <Icon className="size-8 text-white/90" />
+          <IconComponent className="size-8 text-white/90" />
         </motion.div>
         <h3 className="font-bold text-white text-sm lg:text-base mb-3 leading-snug">
           {title}

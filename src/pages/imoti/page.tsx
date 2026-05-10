@@ -17,13 +17,16 @@ import { Button } from "@/components/ui/button.tsx";
 import Navbar from "../_components/Navbar.tsx";
 import ContactSection from "../_components/ContactSection.tsx";
 import Footer from "../_components/Footer.tsx";
-import { PROPERTIES } from "../_lib/properties-data.ts";
+import { useAdminStore } from "../_lib/admin-store.ts";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const property = PROPERTIES.find((p) => p.id === id);
+  const { properties } = useAdminStore();
+  const property = properties
+    .filter((p) => p.isVisible)
+    .find((p) => p.slug === id);
   const [activeImage, setActiveImage] = useState(0);
 
   if (!property) {

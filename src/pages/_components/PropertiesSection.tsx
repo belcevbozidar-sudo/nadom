@@ -1,9 +1,16 @@
 import { motion } from "motion/react";
 import { Link } from "react-router-dom";
-import { MapPin, Maximize2, BedDouble, Calendar, Layers, Phone as PhoneIcon } from "lucide-react";
+import {
+  MapPin,
+  Maximize2,
+  BedDouble,
+  Calendar,
+  Layers,
+  Phone as PhoneIcon,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
-import { PROPERTIES } from "../_lib/properties-data.ts";
+import { useAdminStore } from "../_lib/admin-store.ts";
 
 // Stagger container variants
 const containerVariants = {
@@ -30,6 +37,11 @@ const cardVariants = {
 };
 
 export default function PropertiesSection() {
+  const { properties } = useAdminStore();
+  const visibleProperties = properties
+    .filter((property) => property.isVisible)
+    .sort((a, b) => a.order - b.order);
+
   return (
     <section id="имоти" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,9 +73,9 @@ export default function PropertiesSection() {
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
         >
-          {PROPERTIES.map((property, i) => (
-            <motion.div key={property.id} variants={cardVariants}>
-              <Link to={`/imoti/${property.id}`}>
+          {visibleProperties.map((property, i) => (
+            <motion.div key={property.slug} variants={cardVariants}>
+              <Link to={`/imoti/${property.slug}`}>
                 <motion.div
                   whileHover={{ y: -10, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}

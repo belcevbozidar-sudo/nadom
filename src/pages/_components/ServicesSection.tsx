@@ -1,56 +1,9 @@
 import { motion } from "motion/react";
-import {
-  UserCheck,
-  Calculator,
-  ShieldCheck,
-  Wrench,
-  Truck,
-  KeyRound,
-  Info,
-  FileCheck,
-  Building2,
-  Settings,
-} from "lucide-react";
+import { Building2, Settings } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card.tsx";
-
-const SERVICE_CARDS = [
-  {
-    title: "Проф. домоуправител",
-    description: "Професионално управление на вашата жилищна сграда",
-    image:
-      "https://images.unsplash.com/photo-1763276674437-a1305c7021d1?w=800&q=80",
-    href: "/domoupravitel",
-  },
-  {
-    title: "Електронен касиер",
-    description: "Удобно и прозрачно управление на финансите",
-    image:
-      "https://images.unsplash.com/photo-1758448721162-0c77cf477d6f?w=800&q=80",
-    href: "/el-kasier",
-  },
-  {
-    title: "Административни услуги",
-    description: "Пълно административно обслужване от врата до врата",
-    image:
-      "https://images.unsplash.com/flagged/photo-1551135049-83f3419ef05c?w=800&q=80",
-    href: "/administrativni-uslugi",
-  },
-];
-
-const BUILDING_SERVICES = [
-  { icon: UserCheck, label: "Проф. домоуправител" },
-  { icon: Calculator, label: "Електронен касиер" },
-  { icon: ShieldCheck, label: "Контрол на достъпа" },
-];
-
-const GENERAL_SERVICES = [
-  { icon: Wrench, label: "Ремонт и поддръжка" },
-  { icon: Truck, label: "Транспорт" },
-  { icon: KeyRound, label: "Аксесоари за входа" },
-  { icon: Info, label: "Полезна информация" },
-  { icon: FileCheck, label: "Сделки и застраховки" },
-];
+import { getServiceIcon } from "../_lib/content-icons.ts";
+import { useAdminStore } from "../_lib/admin-store.ts";
 
 // Stagger container
 const stagger = {
@@ -89,6 +42,18 @@ const iconCardVariant = {
 };
 
 export default function ServicesSection() {
+  const { services } = useAdminStore();
+  const visibleServices = services.filter((service) => service.isVisible);
+  const serviceCards = visibleServices
+    .filter((service) => service.category === "homepage_card")
+    .sort((a, b) => a.order - b.order);
+  const buildingServices = visibleServices
+    .filter((service) => service.category === "building")
+    .sort((a, b) => a.order - b.order);
+  const generalServices = visibleServices
+    .filter((service) => service.category === "general")
+    .sort((a, b) => a.order - b.order);
+
   return (
     <section id="услуги" className="py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -123,16 +88,16 @@ export default function ServicesSection() {
           whileInView="visible"
           viewport={{ once: true, margin: "-60px" }}
         >
-          {SERVICE_CARDS.map((card) => (
+          {serviceCards.map((card) => (
             <motion.div key={card.title} variants={fadeSlideUp}>
-              <Link to={card.href}>
+              <Link to={card.href ?? "/"}>
                 <motion.div
                   className="relative group rounded-2xl overflow-hidden h-72 cursor-pointer shadow-xl border border-white/10"
                   whileHover={{ y: -8, scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
                   <motion.img
-                    src={card.image}
+                    src={card.image ?? ""}
                     alt={card.title}
                     className="w-full h-full object-cover"
                     whileHover={{ scale: 1.12 }}
@@ -191,26 +156,37 @@ export default function ServicesSection() {
               whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}
             >
-              {BUILDING_SERVICES.map((svc) => (
-                <motion.div key={svc.label} variants={iconCardVariant}>
-                  <motion.div
-                    whileHover={{ y: -6, scale: 1.04 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
-                      <motion.div
-                        whileHover={{ rotate: 8, scale: 1.2 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                      >
-                        <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3" />
-                      </motion.div>
-                      <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
-                        {svc.label}
-                      </span>
-                    </Card>
+              {buildingServices.map((svc) => {
+                const Icon = getServiceIcon(svc.icon);
+                return (
+                  <motion.div key={svc.title} variants={iconCardVariant}>
+                    <motion.div
+                      whileHover={{ y: -6, scale: 1.04 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      }}
+                    >
+                      <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
+                        <motion.div
+                          whileHover={{ rotate: 8, scale: 1.2 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 12,
+                          }}
+                        >
+                          <Icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3" />
+                        </motion.div>
+                        <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
+                          {svc.title}
+                        </span>
+                      </Card>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              ))}
+                );
+              })}
             </motion.div>
           </div>
 
@@ -246,26 +222,37 @@ export default function ServicesSection() {
               whileInView="visible"
               viewport={{ once: true, margin: "-40px" }}
             >
-              {GENERAL_SERVICES.map((svc) => (
-                <motion.div key={svc.label} variants={iconCardVariant}>
-                  <motion.div
-                    whileHover={{ y: -6, scale: 1.04 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  >
-                    <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
-                      <motion.div
-                        whileHover={{ rotate: -8, scale: 1.2 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                      >
-                        <svc.icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3" />
-                      </motion.div>
-                      <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
-                        {svc.label}
-                      </span>
-                    </Card>
+              {generalServices.map((svc) => {
+                const Icon = getServiceIcon(svc.icon);
+                return (
+                  <motion.div key={svc.title} variants={iconCardVariant}>
+                    <motion.div
+                      whileHover={{ y: -6, scale: 1.04 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 300,
+                        damping: 20,
+                      }}
+                    >
+                      <Card className="flex flex-col items-center text-center p-6 hover:shadow-2xl shadow-lg border-white/20 transition-all duration-300 cursor-pointer group bg-white/95 backdrop-blur-sm">
+                        <motion.div
+                          whileHover={{ rotate: -8, scale: 1.2 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 300,
+                            damping: 12,
+                          }}
+                        >
+                          <Icon className="size-8 text-[oklch(0.35_0.12_250)] mb-3" />
+                        </motion.div>
+                        <span className="text-sm font-semibold text-[oklch(0.14_0.04_255)]">
+                          {svc.title}
+                        </span>
+                      </Card>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
-              ))}
+                );
+              })}
             </motion.div>
           </div>
         </div>

@@ -1,42 +1,16 @@
+import { useState } from "react";
 import { motion } from "motion/react";
-import {
-  Scale,
-  Users,
-  FileText,
-  Wrench,
-  BarChart3,
-  FileSignature,
-  MapPinned,
-  Landmark,
-  GitFork,
-  BadgeDollarSign,
-  ArrowRight,
-  Building2,
-  Briefcase,
-} from "lucide-react";
+import { ArrowRight, Building2, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { type EditableService } from "../_lib/services-data.ts";
+import { getServiceIcon } from "../_lib/content-icons.ts";
+import { createSubmission, useAdminStore } from "../_lib/admin-store.ts";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-const DOMOUPRAVITEL_SERVICES = [
-  { icon: Scale, label: "Legal Representation" },
-  { icon: Users, label: "General Meetings" },
-  { icon: FileText, label: "Documentation & Minutes" },
-  { icon: Wrench, label: "Facility Maintenance" },
-  { icon: BarChart3, label: "Financial Management" },
-];
-
-const ADMIN_SERVICES = [
-  { icon: FileSignature, label: "Document Preparation" },
-  { icon: MapPinned, label: "Surveys & Certificates" },
-  { icon: Landmark, label: "Institutional Representation" },
-  { icon: GitFork, label: "Divisions & Sales" },
-  { icon: BadgeDollarSign, label: "Wills & Donations" },
-];
 
 const inputClass =
   "bg-white/[0.08] border-white/15 text-white placeholder:text-white/40 h-11 rounded-xl focus-visible:ring-white/30 text-sm";
@@ -44,7 +18,7 @@ const inputClass =
 type ServicePanelProps = {
   title: string;
   icon: React.ElementType;
-  services: { icon: React.ElementType; label: string }[];
+  services: EditableService[];
   href: string;
   direction: "left" | "right";
   delay: number;
@@ -77,10 +51,10 @@ function ServicePanel({
 
           <ul className="space-y-2">
             {services.map((s, i) => {
-              const Icon = s.icon;
+              const Icon = getServiceIcon(s.icon);
               return (
                 <motion.li
-                  key={s.label}
+                  key={`${s.title}-${i}`}
                   initial={{ opacity: 0, x: direction === "left" ? -20 : 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{
@@ -92,7 +66,7 @@ function ServicePanel({
                 >
                   <Icon className="size-3.5 text-white/50 shrink-0" />
                   <span className="text-xs lg:text-sm font-medium text-white/75 group-hover:text-white/90 transition-colors">
-                    {s.label}
+                    {s.title}
                   </span>
                 </motion.li>
               );
@@ -110,9 +84,50 @@ function ServicePanel({
 }
 
 export default function HeroSection() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const { services } = useAdminStore();
+  const [form, setForm] = useState({
+    fullName: "",
+    service: "",
+    address: "",
+    region: "",
+    buildingType: "",
+    message: "",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const visibleServices = services.filter((service) => service.isVisible);
+  const domoupravitelServices = visibleServices
+    .filter((service) => service.category === "hero_domoupravitel")
+    .sort((a, b) => a.order - b.order);
+  const adminServices = visibleServices
+    .filter((service) => service.category === "hero_admin")
+    .sort((a, b) => a.order - b.order);
+
+  const updateField =
+    (field: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setForm((current) => ({ ...current, [field]: e.target.value }));
+    };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    toast.success("Thank you! We will contact you soon.");
+    setIsSubmitting(true);
+    try {
+      createSubmission(form);
+      setForm({
+        fullName: "",
+        service: "",
+        address: "",
+        region: "",
+        buildingType: "",
+        message: "",
+      });
+      toast.success("Заявката е изпратена успешно.");
+    } catch {
+      toast.error("Не успяхме да изпратим заявката. Опитайте отново.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -144,7 +159,7 @@ export default function HeroSection() {
             <ServicePanel
               title="Professional Property Manager"
               icon={Building2}
-              services={DOMOUPRAVITEL_SERVICES}
+              services={domoupravitelServices}
               href="/domoupravitel"
               direction="left"
               delay={0.3}
@@ -168,7 +183,7 @@ export default function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                Get a Quote
+                Вземи оферта
               </motion.h2>
               <motion.p
                 className="text-white/50 mb-5 text-xs text-center leading-relaxed"
@@ -189,6 +204,8 @@ export default function HeroSection() {
                     placeholder="Full Name"
                     type="text"
                     aria-label="Full Name"
+                    value={form.fullName}
+                    onChange={updateField("fullName")}
                     className={inputClass}
                   />
                 </motion.div>
@@ -202,6 +219,8 @@ export default function HeroSection() {
                     placeholder="Service"
                     type="text"
                     aria-label="Service"
+                    value={form.service}
+                    onChange={updateField("service")}
                     className={inputClass}
                   />
                 </motion.div>
@@ -215,6 +234,8 @@ export default function HeroSection() {
                     placeholder="Address"
                     type="text"
                     aria-label="Address"
+                    value={form.address}
+                    onChange={updateField("address")}
                     className={inputClass}
                   />
                 </motion.div>
@@ -229,12 +250,16 @@ export default function HeroSection() {
                     placeholder="Region"
                     type="text"
                     aria-label="Region"
+                    value={form.region}
+                    onChange={updateField("region")}
                     className={inputClass}
                   />
                   <Input
                     placeholder="Building Type"
                     type="text"
                     aria-label="Building Type"
+                    value={form.buildingType}
+                    onChange={updateField("buildingType")}
                     className={inputClass}
                   />
                 </motion.div>
@@ -248,6 +273,8 @@ export default function HeroSection() {
                     placeholder="Message"
                     aria-label="Message"
                     rows={3}
+                    value={form.message}
+                    onChange={updateField("message")}
                     className="bg-white/[0.08] border-white/15 text-white placeholder:text-white/40 rounded-xl focus-visible:ring-white/30 text-sm min-h-[72px]"
                   />
                 </motion.div>
@@ -260,9 +287,10 @@ export default function HeroSection() {
                   <Button
                     type="submit"
                     size="lg"
+                    disabled={isSubmitting}
                     className="w-full text-sm font-bold h-12 rounded-xl mt-1"
                   >
-                    GET A QUOTE
+                    {isSubmitting ? "Изпращане..." : "Вземи оферта"}
                   </Button>
                 </motion.div>
               </form>
@@ -274,7 +302,7 @@ export default function HeroSection() {
             <ServicePanel
               title="Administrative Services"
               icon={Briefcase}
-              services={ADMIN_SERVICES}
+              services={adminServices}
               href="/administrativni-uslugi"
               direction="right"
               delay={0.3}
@@ -286,7 +314,7 @@ export default function HeroSection() {
             <ServicePanel
               title="Professional Property Manager"
               icon={Building2}
-              services={DOMOUPRAVITEL_SERVICES}
+              services={domoupravitelServices}
               href="/domoupravitel"
               direction="left"
               delay={0.5}
@@ -294,7 +322,7 @@ export default function HeroSection() {
             <ServicePanel
               title="Administrative Services"
               icon={Briefcase}
-              services={ADMIN_SERVICES}
+              services={adminServices}
               href="/administrativni-uslugi"
               direction="right"
               delay={0.6}

@@ -1,94 +1,13 @@
 import { motion } from "motion/react";
-import {
-  Scale,
-  Users,
-  FileText,
-  BookOpen,
-  ClipboardList,
-  Wallet,
-  Wrench,
-  Hammer,
-  BarChart3,
-  Archive,
-  Shield,
-  CheckCircle2,
-  ArrowRight,
-  Phone,
-} from "lucide-react";
+import { Shield, CheckCircle2, ArrowRight, Phone } from "lucide-react";
 import Navbar from "../_components/Navbar.tsx";
 import ContactSection from "../_components/ContactSection.tsx";
 import Footer from "../_components/Footer.tsx";
+import { type EditableService } from "../_lib/services-data.ts";
+import { getServiceIcon } from "../_lib/content-icons.ts";
+import { useAdminStore } from "../_lib/admin-store.ts";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-type ServiceCard = {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-};
-
-const SERVICES: ServiceCard[] = [
-  {
-    icon: Scale,
-    title: "Правно представителство",
-    description:
-      "Представлява Общото събрание пред държавната и общинската администрация, МВР, съда и всички компетентни органи.",
-  },
-  {
-    icon: Users,
-    title: "Общи събрания",
-    description:
-      "Провежда законосъобразни отчетно-изборни Общи събрания — изготвя покани, председателства, отчита гласуването и съставя протоколи.",
-  },
-  {
-    icon: FileText,
-    title: "Вътрешен ред",
-    description:
-      "Изготвя правилник за вътрешен ред и контролира стриктното му изпълнение от всички обитатели.",
-  },
-  {
-    icon: BookOpen,
-    title: "Юридически консултации",
-    description:
-      "Предоставя правни консултации относно проблеми в етажната собственост, управление и разпореждане с недвижими имоти.",
-  },
-  {
-    icon: ClipboardList,
-    title: "Документация",
-    description:
-      "Подготвя жалби, сигнали, протоколи, предписания, заявления и всички необходими документи до компетентните институции.",
-  },
-  {
-    icon: Wallet,
-    title: "Събиране на задължения",
-    description:
-      "Организира събирането от некоректни платци чрез извънсъдебни и съдебни способи за максимална ефективност.",
-  },
-  {
-    icon: Wrench,
-    title: "Поддръжка на инсталации",
-    description:
-      "Контролира поддръжката на асансьорни уредби, осветление, домофони, пожароизвестителни и пожарогасителни системи.",
-  },
-  {
-    icon: Hammer,
-    title: "Ремонтни дейности",
-    description:
-      "Организира ремонти на общи части — изготвя оферти с цена, срок и качество от квалифицирани специалисти.",
-  },
-  {
-    icon: BarChart3,
-    title: "Финансово управление",
-    description:
-      "Изготвя годишен бюджет, процентно разпределение, съхранение и управление на средствата по утвърдени правила.",
-  },
-  {
-    icon: Archive,
-    title: "Годишен отчет и архив",
-    description:
-      "Предоставя годишен отчет за дейността и води пълна документация на етажната собственост.",
-  },
-];
 
 const HIGHLIGHTS = [
   "15+ години професионален опит",
@@ -101,10 +20,10 @@ function ServiceGridCard({
   service,
   index,
 }: {
-  service: ServiceCard;
+  service: EditableService;
   index: number;
 }) {
-  const Icon = service.icon;
+  const Icon = getServiceIcon(service.icon);
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -133,6 +52,12 @@ function ServiceGridCard({
 }
 
 export default function DomoupravitelPage() {
+  const { services } = useAdminStore();
+  const pageServices = services
+    .filter((service) => service.isVisible)
+    .filter((service) => service.category === "domoupravitel")
+    .sort((a, b) => a.order - b.order);
+
   return (
     <div className="min-h-screen relative">
       {/* Fixed gradient background */}
@@ -277,7 +202,7 @@ export default function DomoupravitelPage() {
           </motion.div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {SERVICES.map((service, i) => (
+            {pageServices.map((service, i) => (
               <ServiceGridCard
                 key={service.title}
                 service={service}
@@ -306,8 +231,8 @@ export default function DomoupravitelPage() {
                 Готови ли сте за професионално управление?
               </h2>
               <p className="text-white/50 max-w-xl mx-auto mb-8 text-base lg:text-lg">
-                Свържете се с нас за безплатна консултация и оферта, съобразена с
-                нуждите на вашата сграда.
+                Свържете се с нас за безплатна консултация и оферта, съобразена
+                с нуждите на вашата сграда.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a

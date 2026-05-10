@@ -1,15 +1,15 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { DefaultProviders } from "./components/providers/default.tsx";
-import ScrollToTop from "./components/scroll-to-top.tsx";
-import { PageTracker } from "./components/page-tracker.tsx";
-import AuthCallback from "./pages/auth/Callback.tsx";
-import Index from "./pages/Index.tsx";
-import AdminServicesPage from "./pages/admin-services/page.tsx";
-import DomoupravitelPage from "./pages/domoupravitel/page.tsx";
-import ElKasierPage from "./pages/el-kasier/page.tsx";
-import PropertyDetailPage from "./pages/imoti/page.tsx";
-import AdminPage from "./pages/admin/page.tsx";
-import NotFound from "./pages/NotFound.tsx";
+import { DefaultProviders } from "./components/providers/default";
+import ScrollToTop from "./components/scroll-to-top";
+import { PageTracker } from "./components/page-tracker";
+import AuthCallback from "./pages/auth/Callback";
+import Index from "./pages/Index";
+import AdminServicesPage from "./pages/admin-services/page";
+import DomoupravitelPage from "./pages/domoupravitel/page";
+import ElKasierPage from "./pages/el-kasier/page";
+import PropertyDetailPage from "./pages/imoti/page";
+import AdminPage from "./pages/admin/page";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (

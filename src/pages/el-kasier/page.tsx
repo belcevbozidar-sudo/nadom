@@ -1,14 +1,6 @@
 import { motion } from "motion/react";
 import {
   CreditCard,
-  Calculator,
-  Receipt,
-  PieChart,
-  FileBarChart,
-  Banknote,
-  Globe,
-  Smartphone,
-  Building2,
   ShieldCheck,
   CheckCircle2,
   ArrowRight,
@@ -17,74 +9,22 @@ import {
 import Navbar from "../_components/Navbar.tsx";
 import ContactSection from "../_components/ContactSection.tsx";
 import Footer from "../_components/Footer.tsx";
+import { getServiceIcon } from "../_lib/content-icons.ts";
+import { useAdminStore } from "../_lib/admin-store.ts";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
 type PaymentMethod = {
-  icon: React.ElementType;
+  icon: string;
   title: string;
   description: string;
 };
-
-const PAYMENT_METHODS: PaymentMethod[] = [
-  {
-    icon: Building2,
-    title: "Каса EasyPay",
-    description:
-      'На всяка каса на EasyPay за търговец "Национална агенция — Домоуправител".',
-  },
-  {
-    icon: Globe,
-    title: "Онлайн в ePay",
-    description:
-      'Бързо и удобно онлайн плащане чрез ePay за търговец "Национална агенция — Домоуправител".',
-  },
-  {
-    icon: Smartphone,
-    title: "Интернет банкиране",
-    description:
-      'Чрез интернет банкиране, раздел "битови сметки", перо "професионален домоуправител".',
-  },
-];
 
 type ServiceCard = {
-  icon: React.ElementType;
+  icon: string;
   title: string;
   description: string;
 };
-
-const SERVICES: ServiceCard[] = [
-  {
-    icon: Calculator,
-    title: "Изчисление на задължения",
-    description:
-      "Изчислява задълженията на собствениците и събира месечните такси точно и навременно.",
-  },
-  {
-    icon: Banknote,
-    title: "Плащане на разходи",
-    description:
-      "Плаща всички разходи за общите части — общ ток, вода, асансьор, почистване и управление.",
-  },
-  {
-    icon: Receipt,
-    title: "Онлайн достъп до отчети",
-    description:
-      "Води отчет за събраните средства и извършените плащания с достъп в реално време чрез nadom.bg.",
-  },
-  {
-    icon: FileBarChart,
-    title: "Отчети за Общо събрание",
-    description:
-      "Предоставя отчети за приходи и разходи, месечни списъци с платени и неплатени такси.",
-  },
-  {
-    icon: PieChart,
-    title: "Планиране на бюджет",
-    description:
-      'Планира годишния бюджет, изчислява месечните вноски за управление, поддръжка и фонд "Ремонт и обновление".',
-  },
-];
 
 const INFO_NOTE =
   "Всеки собственик може да открие абонатния си номер на информационното табло във входа, или ще получи SMS с абонатен номер, потребителско име и парола за достъп до онлайн системата — nadom.bg.";
@@ -106,7 +46,7 @@ function PaymentMethodCard({
   method: PaymentMethod;
   index: number;
 }) {
-  const Icon = method.icon;
+  const Icon = getServiceIcon(method.icon);
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -140,7 +80,7 @@ function ServiceRow({
   service: ServiceCard;
   index: number;
 }) {
-  const Icon = service.icon;
+  const Icon = getServiceIcon(service.icon);
   return (
     <motion.div
       initial={{ opacity: 0, x: -30 }}
@@ -165,6 +105,15 @@ function ServiceRow({
 }
 
 export default function ElKasierPage() {
+  const { services } = useAdminStore();
+  const visibleServices = services.filter((service) => service.isVisible);
+  const paymentMethods = visibleServices
+    .filter((service) => service.category === "payment_method")
+    .sort((a, b) => a.order - b.order);
+  const cashierServices = visibleServices
+    .filter((service) => service.category === "el_kasier")
+    .sort((a, b) => a.order - b.order);
+
   return (
     <div className="min-h-screen relative">
       {/* Fixed gradient background */}
@@ -234,8 +183,8 @@ export default function ElKasierPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.55, ease: EASE }}
           >
-            Лесно плащане на месечните такси по множество удобни начини.
-            Пълна прозрачност и достъп до счетоводството в реално време.
+            Лесно плащане на месечните такси по множество удобни начини. Пълна
+            прозрачност и достъп до счетоводството в реално време.
           </motion.p>
 
           <motion.div
@@ -310,13 +259,13 @@ export default function ElKasierPage() {
               Начини на плащане
             </h2>
             <p className="mt-4 text-white/50 max-w-2xl mx-auto text-base lg:text-lg">
-              Плащайте месечните си такси бързо и удобно с абонатен номер
-              по един от следните начини
+              Плащайте месечните си такси бързо и удобно с абонатен номер по
+              един от следните начини
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {PAYMENT_METHODS.map((method, i) => (
+            {paymentMethods.map((method, i) => (
               <PaymentMethodCard key={method.title} method={method} index={i} />
             ))}
           </div>
@@ -360,7 +309,7 @@ export default function ElKasierPage() {
           </motion.div>
 
           <div className="space-y-4">
-            {SERVICES.map((service, i) => (
+            {cashierServices.map((service, i) => (
               <ServiceRow key={service.title} service={service} index={i} />
             ))}
           </div>
@@ -397,8 +346,8 @@ export default function ElKasierPage() {
                 Започнете да плащате лесно
               </h2>
               <p className="text-white/50 max-w-xl mx-auto mb-8 text-base lg:text-lg">
-                Свържете се с нас за да получите вашия абонатен номер 
-                и достъп до онлайн системата nadom.bg.
+                Свържете се с нас за да получите вашия абонатен номер и достъп
+                до онлайн системата nadom.bg.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a
