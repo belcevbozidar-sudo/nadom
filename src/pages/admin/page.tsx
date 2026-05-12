@@ -36,12 +36,16 @@ import { Checkbox } from "@/components/ui/checkbox.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import type { Id } from "@/convex/_generated/dataModel.d.ts";
 import {
+  DEFAULT_SERVICES,
   SERVICE_CATEGORIES,
   SERVICE_CATEGORY_LABELS,
   type EditableService,
   type ServiceCategory,
 } from "../_lib/services-data.ts";
-import { type EditableProperty } from "../_lib/properties-data.ts";
+import {
+  DEFAULT_PROPERTIES,
+  type EditableProperty,
+} from "../_lib/properties-data.ts";
 import { SERVICE_ICON_MAP } from "../_lib/content-icons.ts";
 import {
   deleteProperty,
@@ -428,8 +432,70 @@ function ReviewsPanel() {
 
 function LiveReviewsPanel() {
   const reviews = useQuery(api.reviews.getAllReviews, {});
+  const createReview = useMutation(api.reviews.createReview);
+  const updateReview = useMutation(api.reviews.updateReview);
   const toggleVisibility = useMutation(api.reviews.toggleVisibility);
   const deleteReview = useMutation(api.reviews.deleteReview);
+  const [editingReviewId, setEditingReviewId] = useState<Id<"reviews"> | null>(
+    null,
+  );
+  const [reviewForm, setReviewForm] = useState({
+    authorName: "",
+    rating: 5,
+    comment: "",
+    isVisible: true,
+  });
+
+  const resetReviewForm = () => {
+    setEditingReviewId(null);
+    setReviewForm({
+      authorName: "",
+      rating: 5,
+      comment: "",
+      isVisible: true,
+    });
+  };
+
+  const handleEditReview = (review: NonNullable<typeof reviews>[number]) => {
+    setEditingReviewId(review._id);
+    setReviewForm({
+      authorName: review.authorName,
+      rating: review.rating,
+      comment: review.comment,
+      isVisible: review.isVisible,
+    });
+  };
+
+  const handleSaveReview = async () => {
+    try {
+      if (editingReviewId) {
+        await updateReview({
+          reviewId: editingReviewId,
+          authorName: reviewForm.authorName,
+          rating: reviewForm.rating,
+          comment: reviewForm.comment,
+          isVisible: reviewForm.isVisible,
+        });
+        toast.success("Ревюто е обновено.");
+      } else {
+        await createReview({
+          authorName: reviewForm.authorName,
+          rating: reviewForm.rating,
+          comment: reviewForm.comment,
+          isVisible: reviewForm.isVisible,
+        });
+        toast.success("Ревюто е добавено.");
+      }
+      resetReviewForm();
+    } catch (error) {
+      if (error instanceof ConvexError) {
+        const { message } = error.data as { code: string; message: string };
+        toast.error(message);
+      } else {
+        toast.error("Не успяхме да запазим ревюто.");
+      }
+    }
+  };
 
   const handleToggle = async (reviewId: Id<"reviews">) => {
     try {
@@ -470,6 +536,72 @@ function LiveReviewsPanel() {
           </span>
         )}
       </h2>
+
+      <Card className="border-white/10 bg-white/5 backdrop-blur-md">
+        <CardHeader>
+          <CardTitle className="text-white text-base">
+            {editingReviewId ? "Редакция на ревю" : "Ново ревю"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid sm:grid-cols-[1fr_120px] gap-3">
+            <Input
+              value={reviewForm.authorName}
+              onChange={(e) =>
+                setReviewForm({ ...reviewForm, authorName: e.target.value })
+              }
+              placeholder="Име на клиента"
+              className="bg-white/10 border-white/20 text-white"
+            />
+            <Input
+              type="number"
+              min={1}
+              max={5}
+              value={reviewForm.rating}
+              onChange={(e) =>
+                setReviewForm({
+                  ...reviewForm,
+                  rating: Math.max(1, Math.min(5, Number(e.target.value) || 1)),
+                })
+              }
+              placeholder="Оценка"
+              className="bg-white/10 border-white/20 text-white"
+            />
+          </div>
+          <Textarea
+            value={reviewForm.comment}
+            onChange={(e) =>
+              setReviewForm({ ...reviewForm, comment: e.target.value })
+            }
+            placeholder="Текст на ревюто"
+            className="bg-white/10 border-white/20 text-white min-h-24"
+          />
+          <label className="flex items-center gap-2 text-sm text-white/70 px-2">
+            <Checkbox
+              checked={reviewForm.isVisible}
+              onCheckedChange={(checked) =>
+                setReviewForm({ ...reviewForm, isVisible: checked === true })
+              }
+            />
+            Видимо на сайта
+          </label>
+          <div className="flex gap-2">
+            <Button onClick={handleSaveReview} className="font-bold">
+              <Save className="size-4 mr-1.5" />
+              Запази
+            </Button>
+            {editingReviewId && (
+              <Button
+                variant="ghost"
+                onClick={resetReviewForm}
+                className="text-white/60 hover:text-white hover:bg-white/10"
+              >
+                Откажи
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {reviews === undefined ? (
         <div className="space-y-3">
@@ -544,6 +676,15 @@ function LiveReviewsPanel() {
                     <Button
                       size="sm"
                       variant="ghost"
+                      onClick={() => handleEditReview(review)}
+                      className="text-white/50 hover:text-white hover:bg-white/10 h-8 px-2"
+                      title="Редактирай"
+                    >
+                      Редакция
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
                       onClick={() => handleToggle(review._id)}
                       className="text-white/50 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
                       title={review.isVisible ? "Скрий" : "Покажи"}
@@ -576,19 +717,15 @@ function LiveReviewsPanel() {
 
 // ── Form submissions panel ─────────────────────────────────────
 
-function SubmissionsPanel() {
-  const { submissions } = useAdminStore();
-
-  const handleStatus = (submissionId: string, status: string) => {
-    updateSubmissionStatus(submissionId, status);
-    toast.success("Статусът е обновен.");
-  };
-
-  const handleDelete = (submissionId: string) => {
-    deleteSubmission(submissionId);
-    toast.success("Заявката е изтрита.");
-  };
-
+function SubmissionsPanelContent({
+  submissions,
+  onStatus,
+  onDelete,
+}: {
+  submissions: AdminSubmission[];
+  onStatus: (submissionId: string, status: string) => void;
+  onDelete: (submissionId: string) => void;
+}) {
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-white flex items-center gap-2">
@@ -662,7 +799,7 @@ function SubmissionsPanel() {
                     <select
                       value={submission.status}
                       onChange={(e) =>
-                        handleStatus(submission.id, e.target.value)
+                        onStatus(submission.id, e.target.value)
                       }
                       className="h-9 rounded-lg bg-white/10 border border-white/15 text-white text-sm px-2"
                     >
@@ -673,7 +810,7 @@ function SubmissionsPanel() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleDelete(submission.id)}
+                      onClick={() => onDelete(submission.id)}
                       className="text-red-400/80 hover:text-red-300 hover:bg-red-500/10 h-9 w-9 p-0"
                     >
                       <Trash2 className="size-4" />
@@ -686,6 +823,68 @@ function SubmissionsPanel() {
         </div>
       )}
     </div>
+  );
+}
+
+function LocalSubmissionsPanel() {
+  const { submissions } = useAdminStore();
+
+  return (
+    <SubmissionsPanelContent
+      submissions={submissions}
+      onStatus={(submissionId, status) => {
+        updateSubmissionStatus(submissionId, status);
+        toast.success("Статусът е обновен.");
+      }}
+      onDelete={(submissionId) => {
+        deleteSubmission(submissionId);
+        toast.success("Заявката е изтрита.");
+      }}
+    />
+  );
+}
+
+function ConvexSubmissionsPanel() {
+  const submissions = useQuery(api.formSubmissions.list, {
+    adminPassword: ADMIN_PASSWORD,
+  });
+  const updateStatus = useMutation(api.formSubmissions.updateStatus);
+  const removeSubmission = useMutation(api.formSubmissions.remove);
+
+  if (submissions === undefined) {
+    return <Skeleton className="h-40 w-full bg-white/10" />;
+  }
+
+  return (
+    <SubmissionsPanelContent
+      submissions={submissions.map((submission) => ({
+        ...submission,
+        id: submission._id,
+      }))}
+      onStatus={async (submissionId, status) => {
+        await updateStatus({
+          adminPassword: ADMIN_PASSWORD,
+          submissionId: submissionId as Id<"formSubmissions">,
+          status,
+        });
+        toast.success("Статусът е обновен.");
+      }}
+      onDelete={async (submissionId) => {
+        await removeSubmission({
+          adminPassword: ADMIN_PASSWORD,
+          submissionId: submissionId as Id<"formSubmissions">,
+        });
+        toast.success("Заявката е изтрита.");
+      }}
+    />
+  );
+}
+
+function SubmissionsPanel() {
+  return HAS_CONVEX_BACKEND ? (
+    <ConvexSubmissionsPanel />
+  ) : (
+    <LocalSubmissionsPanel />
   );
 }
 
@@ -702,8 +901,15 @@ const emptyService: EditableService = {
   isVisible: true,
 };
 
-function ServicesAdminPanel() {
-  const { services } = useAdminStore();
+function ServicesAdminPanelContent({
+  services,
+  onSave,
+  onDelete,
+}: {
+  services: AdminService[];
+  onSave: (service: EditableService & { id?: string }) => Promise<void> | void;
+  onDelete: (serviceId: string) => Promise<void> | void;
+}) {
   const [activeCategory, setActiveCategory] =
     useState<ServiceCategory>("general");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -736,7 +942,7 @@ function ServicesAdminPanel() {
     });
   };
 
-  const handleSaveService = () => {
+  const handleSaveService = async () => {
     try {
       const payload = {
         ...form,
@@ -747,7 +953,7 @@ function ServicesAdminPanel() {
         description: form.description.trim(),
       };
 
-      saveService(payload);
+      await onSave(payload);
       toast.success("Услугата е запазена.");
       startNew();
     } catch {
@@ -755,10 +961,10 @@ function ServicesAdminPanel() {
     }
   };
 
-  const handleDeleteService = () => {
+  const handleDeleteService = async () => {
     if (!selectedId) return;
     try {
-      deleteService(selectedId);
+      await onDelete(selectedId);
       toast.success("Услугата е изтрита.");
       startNew();
     } catch {
@@ -913,6 +1119,89 @@ function ServicesAdminPanel() {
   );
 }
 
+function LocalServicesAdminPanel() {
+  const { services } = useAdminStore();
+
+  return (
+    <ServicesAdminPanelContent
+      services={services}
+      onSave={(service) => saveService(service)}
+      onDelete={(serviceId) => deleteService(serviceId)}
+    />
+  );
+}
+
+function ConvexServicesAdminPanel() {
+  const services = useQuery(api.services.listAdmin, {
+    adminPassword: ADMIN_PASSWORD,
+  });
+  const createService = useMutation(api.services.create);
+  const updateService = useMutation(api.services.update);
+  const removeService = useMutation(api.services.remove);
+  const seedDefaults = useMutation(api.services.seedDefaults);
+
+  if (services === undefined) {
+    return <Skeleton className="h-80 w-full bg-white/10" />;
+  }
+
+  const normalizedServices = services.map((service) => ({
+    ...service,
+    id: service._id,
+    category: service.category as ServiceCategory,
+  }));
+
+  return (
+    <div className="space-y-4">
+      {services.length === 0 && (
+        <Button
+          onClick={async () => {
+            await seedDefaults({
+              adminPassword: ADMIN_PASSWORD,
+              services: DEFAULT_SERVICES,
+            });
+            toast.success("Началните услуги са добавени в Convex.");
+          }}
+          className="font-bold"
+        >
+          Добави началните услуги
+        </Button>
+      )}
+      <ServicesAdminPanelContent
+        services={normalizedServices}
+        onSave={async (payload) => {
+          const { id, ...service } = payload;
+          if (id) {
+            await updateService({
+              adminPassword: ADMIN_PASSWORD,
+              serviceId: id as Id<"services">,
+              service,
+            });
+          } else {
+            await createService({
+              adminPassword: ADMIN_PASSWORD,
+              service,
+            });
+          }
+        }}
+        onDelete={async (serviceId) => {
+          await removeService({
+            adminPassword: ADMIN_PASSWORD,
+            serviceId: serviceId as Id<"services">,
+          });
+        }}
+      />
+    </div>
+  );
+}
+
+function ServicesAdminPanel() {
+  return HAS_CONVEX_BACKEND ? (
+    <ConvexServicesAdminPanel />
+  ) : (
+    <LocalServicesAdminPanel />
+  );
+}
+
 // ── Properties management panel ────────────────────────────────
 
 const emptyProperty: EditableProperty = {
@@ -933,8 +1222,15 @@ const emptyProperty: EditableProperty = {
   isVisible: true,
 };
 
-function PropertiesAdminPanel() {
-  const { properties } = useAdminStore();
+function PropertiesAdminPanelContent({
+  properties,
+  onSave,
+  onDelete,
+}: {
+  properties: AdminProperty[];
+  onSave: (property: EditableProperty & { id?: string }) => Promise<void> | void;
+  onDelete: (propertyId: string) => Promise<void> | void;
+}) {
   const sortedProperties = [...properties].sort((a, b) => a.order - b.order);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<EditableProperty>(emptyProperty);
@@ -969,7 +1265,7 @@ function PropertiesAdminPanel() {
     setGalleryText(property.gallery.join("\n"));
   };
 
-  const handleSaveProperty = () => {
+  const handleSaveProperty = async () => {
     try {
       const gallery = galleryText
         .split("\n")
@@ -991,7 +1287,7 @@ function PropertiesAdminPanel() {
         gallery: gallery.length > 0 ? gallery : [form.image.trim()],
       };
 
-      saveProperty(payload);
+      await onSave(payload);
       toast.success("Имотът е запазен.");
       startNew();
     } catch {
@@ -999,10 +1295,10 @@ function PropertiesAdminPanel() {
     }
   };
 
-  const handleDeleteProperty = () => {
+  const handleDeleteProperty = async () => {
     if (!selectedId) return;
     try {
-      deleteProperty(selectedId);
+      await onDelete(selectedId);
       toast.success("Имотът е изтрит.");
       startNew();
     } catch {
@@ -1198,6 +1494,88 @@ function PropertiesAdminPanel() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+function LocalPropertiesAdminPanel() {
+  const { properties } = useAdminStore();
+
+  return (
+    <PropertiesAdminPanelContent
+      properties={properties}
+      onSave={(property) => saveProperty(property)}
+      onDelete={(propertyId) => deleteProperty(propertyId)}
+    />
+  );
+}
+
+function ConvexPropertiesAdminPanel() {
+  const properties = useQuery(api.properties.listAdmin, {
+    adminPassword: ADMIN_PASSWORD,
+  });
+  const createProperty = useMutation(api.properties.create);
+  const updateProperty = useMutation(api.properties.update);
+  const removeProperty = useMutation(api.properties.remove);
+  const seedDefaults = useMutation(api.properties.seedDefaults);
+
+  if (properties === undefined) {
+    return <Skeleton className="h-80 w-full bg-white/10" />;
+  }
+
+  const normalizedProperties = properties.map((property) => ({
+    ...property,
+    id: property._id,
+  }));
+
+  return (
+    <div className="space-y-4">
+      {properties.length === 0 && (
+        <Button
+          onClick={async () => {
+            await seedDefaults({
+              adminPassword: ADMIN_PASSWORD,
+              properties: DEFAULT_PROPERTIES,
+            });
+            toast.success("Началните имоти са добавени в Convex.");
+          }}
+          className="font-bold"
+        >
+          Добави началните имоти
+        </Button>
+      )}
+      <PropertiesAdminPanelContent
+        properties={normalizedProperties}
+        onSave={async (payload) => {
+          const { id, ...property } = payload;
+          if (id) {
+            await updateProperty({
+              adminPassword: ADMIN_PASSWORD,
+              propertyId: id as Id<"properties">,
+              property,
+            });
+          } else {
+            await createProperty({
+              adminPassword: ADMIN_PASSWORD,
+              property,
+            });
+          }
+        }}
+        onDelete={async (propertyId) => {
+          await removeProperty({
+            adminPassword: ADMIN_PASSWORD,
+            propertyId: propertyId as Id<"properties">,
+          });
+        }}
+      />
+    </div>
+  );
+}
+
+function PropertiesAdminPanel() {
+  return HAS_CONVEX_BACKEND ? (
+    <ConvexPropertiesAdminPanel />
+  ) : (
+    <LocalPropertiesAdminPanel />
   );
 }
 

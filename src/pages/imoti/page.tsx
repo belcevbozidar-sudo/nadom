@@ -18,15 +18,18 @@ import Navbar from "../_components/Navbar.tsx";
 import ContactSection from "../_components/ContactSection.tsx";
 import Footer from "../_components/Footer.tsx";
 import { useAdminStore } from "../_lib/admin-store.ts";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api.js";
+import type { EditableProperty } from "../_lib/properties-data.ts";
 
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
+const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 
-export default function PropertyDetailPage() {
-  const { id } = useParams<{ id: string }>();
-  const { properties } = useAdminStore();
-  const property = properties
-    .filter((p) => p.isVisible)
-    .find((p) => p.slug === id);
+function PropertyDetailContent({
+  property,
+}: {
+  property: EditableProperty | null | undefined;
+}) {
   const [activeImage, setActiveImage] = useState(0);
 
   if (!property) {
@@ -302,4 +305,37 @@ export default function PropertyDetailPage() {
       <Footer />
     </div>
   );
+}
+
+function LocalPropertyDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const { properties } = useAdminStore();
+  const property = properties
+    .filter((p) => p.isVisible)
+    .find((p) => p.slug === id);
+
+  return <PropertyDetailContent property={property} />;
+}
+
+function ConvexPropertyDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const property = useQuery(api.properties.getBySlug, { slug: id ?? "" });
+  const { properties } = useAdminStore();
+  const fallbackProperty = properties
+    .filter((p) => p.isVisible)
+    .find((p) => p.slug === id);
+
+  return (
+    <PropertyDetailContent
+      property={(property as EditableProperty | null | undefined) ?? fallbackProperty}
+    />
+  );
+}
+
+export default function PropertyDetailPage() {
+  if (HAS_CONVEX_BACKEND) {
+    return <ConvexPropertyDetailPage />;
+  }
+
+  return <LocalPropertyDetailPage />;
 }

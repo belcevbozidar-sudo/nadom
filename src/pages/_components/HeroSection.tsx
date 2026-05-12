@@ -9,8 +9,11 @@ import { toast } from "sonner";
 import { type EditableService } from "../_lib/services-data.ts";
 import { getServiceIcon } from "../_lib/content-icons.ts";
 import { createSubmission, useAdminStore } from "../_lib/admin-store.ts";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api.js";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 
 const inputClass =
   "bg-white/[0.08] border-white/15 text-white placeholder:text-white/40 h-11 rounded-xl focus-visible:ring-white/30 text-sm";
@@ -22,6 +25,20 @@ type ServicePanelProps = {
   href: string;
   direction: "left" | "right";
   delay: number;
+};
+
+type QuoteForm = {
+  fullName: string;
+  service: string;
+  address: string;
+  region: string;
+  buildingType: string;
+  message: string;
+};
+
+type HeroSectionContentProps = {
+  services: EditableService[];
+  onSubmitQuote: (form: QuoteForm) => Promise<unknown> | unknown;
 };
 
 function ServicePanel({
@@ -83,9 +100,11 @@ function ServicePanel({
   );
 }
 
-export default function HeroSection() {
-  const { services } = useAdminStore();
-  const [form, setForm] = useState({
+function HeroSectionContent({
+  services,
+  onSubmitQuote,
+}: HeroSectionContentProps) {
+  const [form, setForm] = useState<QuoteForm>({
     fullName: "",
     service: "",
     address: "",
@@ -113,7 +132,7 @@ export default function HeroSection() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      createSubmission(form);
+      await onSubmitQuote(form);
       setForm({
         fullName: "",
         service: "",
@@ -335,4 +354,39 @@ export default function HeroSection() {
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[oklch(0.42_0.16_250)] to-transparent" />
     </section>
   );
+}
+
+function LocalHeroSection() {
+  const { services } = useAdminStore();
+  return (
+    <HeroSectionContent
+      services={services}
+      onSubmitQuote={(form) => createSubmission(form)}
+    />
+  );
+}
+
+function ConvexHeroSection() {
+  const services = useQuery(api.services.listPublic, {});
+  const { services: fallbackServices } = useAdminStore();
+  const createFormSubmission = useMutation(api.formSubmissions.create);
+
+  return (
+    <HeroSectionContent
+      services={
+        services && services.length > 0
+          ? (services as EditableService[])
+          : fallbackServices
+      }
+      onSubmitQuote={(form) => createFormSubmission(form)}
+    />
+  );
+}
+
+export default function HeroSection() {
+  if (HAS_CONVEX_BACKEND) {
+    return <ConvexHeroSection />;
+  }
+
+  return <LocalHeroSection />;
 }

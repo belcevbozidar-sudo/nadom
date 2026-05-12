@@ -4,6 +4,11 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card.tsx";
 import { getServiceIcon } from "../_lib/content-icons.ts";
 import { useAdminStore } from "../_lib/admin-store.ts";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api.js";
+import type { EditableService } from "../_lib/services-data.ts";
+
+const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 
 // Stagger container
 const stagger = {
@@ -41,8 +46,7 @@ const iconCardVariant = {
   },
 };
 
-export default function ServicesSection() {
-  const { services } = useAdminStore();
+function ServicesSectionContent({ services }: { services: EditableService[] }) {
   const visibleServices = services.filter((service) => service.isVisible);
   const serviceCards = visibleServices
     .filter((service) => service.category === "homepage_card")
@@ -259,4 +263,31 @@ export default function ServicesSection() {
       </div>
     </section>
   );
+}
+
+function LocalServicesSection() {
+  const { services } = useAdminStore();
+  return <ServicesSectionContent services={services} />;
+}
+
+function ConvexServicesSection() {
+  const services = useQuery(api.services.listPublic, {});
+  const { services: fallbackServices } = useAdminStore();
+  return (
+    <ServicesSectionContent
+      services={
+        services && services.length > 0
+          ? (services as EditableService[])
+          : fallbackServices
+      }
+    />
+  );
+}
+
+export default function ServicesSection() {
+  if (HAS_CONVEX_BACKEND) {
+    return <ConvexServicesSection />;
+  }
+
+  return <LocalServicesSection />;
 }

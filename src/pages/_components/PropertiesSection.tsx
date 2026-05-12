@@ -11,6 +11,11 @@ import {
 import { Card, CardContent } from "@/components/ui/card.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { useAdminStore } from "../_lib/admin-store.ts";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api.js";
+import type { EditableProperty } from "../_lib/properties-data.ts";
+
+const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 
 // Stagger container variants
 const containerVariants = {
@@ -36,8 +41,11 @@ const cardVariants = {
   },
 };
 
-export default function PropertiesSection() {
-  const { properties } = useAdminStore();
+function PropertiesSectionContent({
+  properties,
+}: {
+  properties: EditableProperty[];
+}) {
   const visibleProperties = properties
     .filter((property) => property.isVisible)
     .sort((a, b) => a.order - b.order);
@@ -164,4 +172,31 @@ export default function PropertiesSection() {
       </div>
     </section>
   );
+}
+
+function LocalPropertiesSection() {
+  const { properties } = useAdminStore();
+  return <PropertiesSectionContent properties={properties} />;
+}
+
+function ConvexPropertiesSection() {
+  const properties = useQuery(api.properties.listPublic, {});
+  const { properties: fallbackProperties } = useAdminStore();
+  return (
+    <PropertiesSectionContent
+      properties={
+        properties && properties.length > 0
+          ? properties
+          : fallbackProperties
+      }
+    />
+  );
+}
+
+export default function PropertiesSection() {
+  if (HAS_CONVEX_BACKEND) {
+    return <ConvexPropertiesSection />;
+  }
+
+  return <LocalPropertiesSection />;
 }

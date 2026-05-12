@@ -23,18 +23,13 @@ export const getAllReviews = query({
 
 export const createReview = mutation({
   args: {
+    authorName: v.optional(v.string()),
     rating: v.number(),
     comment: v.string(),
+    isVisible: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new ConvexError({
-        code: "UNAUTHENTICATED",
-        message: "Трябва да влезете в акаунта си, за да оставите ревю.",
-      });
-    }
-
     if (args.rating < 1 || args.rating > 5) {
       throw new ConvexError({
         code: "BAD_REQUEST",
@@ -49,26 +44,47 @@ export const createReview = mutation({
       });
     }
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier),
-      )
-      .unique();
+    const user = identity
+      ? await ctx.db
+          .query("users")
+          .withIndex("by_token", (q) =>
+            q.eq("tokenIdentifier", identity.tokenIdentifier),
+          )
+          .unique()
+      : null;
 
-    if (!user) {
+    return await ctx.db.insert("reviews", {
+      userId: user?._id,
+      authorName:
+        args.authorName?.trim() || user?.name || identity?.name || "Клиент",
+      rating: Math.round(args.rating),
+      comment: args.comment.trim(),
+      isVisible: args.isVisible ?? true,
+    });
+  },
+});
+
+export const updateReview = mutation({
+  args: {
+    reviewId: v.id("reviews"),
+    authorName: v.string(),
+    rating: v.number(),
+    comment: v.string(),
+    isVisible: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    if (args.rating < 1 || args.rating > 5) {
       throw new ConvexError({
-        code: "NOT_FOUND",
-        message: "Потребителят не е намерен.",
+        code: "BAD_REQUEST",
+        message: "Оценката трябва да е между 1 и 5.",
       });
     }
 
-    return await ctx.db.insert("reviews", {
-      userId: user._id,
-      authorName: user.name ?? identity.name ?? "Анонимен",
+    await ctx.db.patch(args.reviewId, {
+      authorName: args.authorName.trim() || "Клиент",
       rating: Math.round(args.rating),
       comment: args.comment.trim(),
-      isVisible: true,
+      isVisible: args.isVisible,
     });
   },
 });

@@ -9,7 +9,7 @@ export default defineSchema({
   }).index("by_token", ["tokenIdentifier"]),
 
   reviews: defineTable({
-    userId: v.id("users"),
+    userId: v.optional(v.id("users")),
     authorName: v.string(),
     rating: v.number(),
     comment: v.string(),

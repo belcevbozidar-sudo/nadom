@@ -9,7 +9,10 @@
  */
 
 import type * as analytics from "../analytics.js";
+import type * as formSubmissions from "../formSubmissions.js";
+import type * as properties from "../properties.js";
 import type * as reviews from "../reviews.js";
+import type * as services from "../services.js";
 import type * as users from "../users.js";
 
 import type {
@@ -20,7 +23,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   analytics: typeof analytics;
+  formSubmissions: typeof formSubmissions;
+  properties: typeof properties;
   reviews: typeof reviews;
+  services: typeof services;
   users: typeof users;
 }>;
 
