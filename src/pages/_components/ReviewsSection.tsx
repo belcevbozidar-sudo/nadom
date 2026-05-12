@@ -1,13 +1,8 @@
-import { useState } from "react";
 import { motion } from "motion/react";
-import { Star, MessageSquarePlus, Quote } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api.js";
-import { Authenticated, Unauthenticated } from "convex/react";
-import { Button } from "@/components/ui/button.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
-import { SignInButton } from "@/components/ui/signin.tsx";
-import ReviewDialog from "./ReviewDialog.tsx";
 
 const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 
@@ -50,7 +45,6 @@ function ReviewsContent() {
 
 function LiveReviewsContent() {
   const reviews = useQuery(api.reviews.getVisibleReviews, {});
-  const [dialogOpen, setDialogOpen] = useState(false);
 
   if (reviews === undefined) {
     return (
@@ -94,22 +88,6 @@ function LiveReviewsContent() {
             </div>
           </div>
 
-          <Authenticated>
-            <Button
-              onClick={() => setDialogOpen(true)}
-              className="bg-white/15 text-white border border-white/20 hover:bg-white/25 gap-2"
-            >
-              <MessageSquarePlus className="size-4" />
-              Оставете ревю
-            </Button>
-          </Authenticated>
-          <Unauthenticated>
-            <SignInButton
-              signInText="Влезте, за да оставите ревю"
-              size="sm"
-              className="bg-white/15 text-white border-white/20 hover:bg-white/25"
-            />
-          </Unauthenticated>
         </motion.div>
       )}
 
@@ -123,24 +101,8 @@ function LiveReviewsContent() {
         >
           <Quote className="size-12 text-white/20 mx-auto mb-4" />
           <p className="text-white/60 text-lg mb-6">
-            Все още няма ревюта. Бъдете първият!
+            Все още няма публикувани ревюта.
           </p>
-          <Authenticated>
-            <Button
-              onClick={() => setDialogOpen(true)}
-              className="bg-white text-[oklch(0.20_0.06_250)] hover:bg-white/90 font-bold gap-2"
-            >
-              <MessageSquarePlus className="size-4" />
-              Напишете ревю
-            </Button>
-          </Authenticated>
-          <Unauthenticated>
-            <SignInButton
-              signInText="Влезте, за да оставите ревю"
-              size="default"
-              className="bg-white/15 text-white border-white/20 hover:bg-white/25"
-            />
-          </Unauthenticated>
         </motion.div>
       ) : (
         <motion.div
@@ -192,7 +154,6 @@ function LiveReviewsContent() {
         </motion.div>
       )}
 
-      <ReviewDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </>
   );
 }
