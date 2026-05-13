@@ -101,7 +101,7 @@ function ServicesSectionContent({ services }: { services: EditableService[] }) {
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
                   <motion.img
-                    src={card.image ?? ""}
+                    src={(card as EditableService & { imageUrl?: string }).imageUrl ?? card.image ?? ""}
                     alt={card.title}
                     className="w-full h-full object-cover"
                     whileHover={{ scale: 1.12 }}

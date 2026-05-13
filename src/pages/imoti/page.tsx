@@ -28,7 +28,10 @@ const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 function PropertyDetailContent({
   property,
 }: {
-  property: EditableProperty | null | undefined;
+  property:
+    | (EditableProperty & { imageUrl?: string; galleryUrls?: string[] })
+    | null
+    | undefined;
 }) {
   const [activeImage, setActiveImage] = useState(0);
 
@@ -59,15 +62,21 @@ function PropertyDetailContent({
 
   const handlePrev = () => {
     setActiveImage((prev) =>
-      prev === 0 ? property.gallery.length - 1 : prev - 1,
+      prev === 0 ? galleryImages.length - 1 : prev - 1,
     );
   };
 
   const handleNext = () => {
     setActiveImage((prev) =>
-      prev === property.gallery.length - 1 ? 0 : prev + 1,
-    );
+      prev === galleryImages.length - 1 ? 0 : prev + 1,
+  );
   };
+
+  const mainImage = property.imageUrl ?? property.image;
+  const galleryImages =
+    property.galleryUrls && property.galleryUrls.length > 0
+      ? property.galleryUrls
+      : property.gallery;
 
   return (
     <div className="min-h-screen relative">
@@ -88,7 +97,7 @@ function PropertyDetailContent({
           transition={{ duration: 2, ease: EASE_OUT_EXPO }}
         >
           <img
-            src={property.image}
+            src={mainImage}
             alt={property.title}
             className="w-full h-full object-cover"
           />
@@ -136,7 +145,7 @@ function PropertyDetailContent({
                 <div className="relative rounded-xl overflow-hidden mb-4 aspect-[4/3]">
                   <motion.img
                     key={activeImage}
-                    src={property.gallery[activeImage]}
+                    src={galleryImages[activeImage]}
                     alt={`${property.title} - снимка ${activeImage + 1}`}
                     className="w-full h-full object-cover"
                     initial={{ opacity: 0 }}
@@ -164,7 +173,7 @@ function PropertyDetailContent({
 
                 {/* Thumbnails */}
                 <div className="grid grid-cols-4 gap-2">
-                  {property.gallery.map((thumb, i) => (
+                  {galleryImages.map((thumb, i) => (
                     <button
                       key={i}
                       onClick={() => setActiveImage(i)}

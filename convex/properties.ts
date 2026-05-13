@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 const ADMIN_PASSWORD = "1122334455";
 
@@ -30,14 +31,32 @@ const propertyFields = {
   isVisible: v.boolean(),
 };
 
+async function getImageUrl(ctx: any, value: string) {
+  if (/^(https?:|data:)/.test(value)) return value;
+  return (await ctx.storage.getUrl(value as Id<"_storage">)) ?? value;
+}
+
+async function withImageUrls(ctx: any, property: any) {
+  return {
+    ...property,
+    imageUrl: await getImageUrl(ctx, property.image),
+    galleryUrls: await Promise.all(
+      property.gallery.map((image: string) => getImageUrl(ctx, image)),
+    ),
+  };
+}
+
 export const listPublic = query({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db
+    const properties = await ctx.db
       .query("properties")
       .withIndex("by_visible", (q) => q.eq("isVisible", true))
       .order("asc")
       .collect();
+    return await Promise.all(
+      properties.map((property) => withImageUrls(ctx, property)),
+    );
   },
 });
 
@@ -48,7 +67,7 @@ export const getBySlug = query({
       .query("properties")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
-    return property?.isVisible ? property : null;
+    return property?.isVisible ? await withImageUrls(ctx, property) : null;
   },
 });
 
@@ -57,7 +76,10 @@ export const listAdmin = query({
   handler: async (ctx, args) => {
     assertAdmin(args.adminPassword);
     const properties = await ctx.db.query("properties").collect();
-    return properties.sort((a, b) => a.order - b.order);
+    const sortedProperties = properties.sort((a, b) => a.order - b.order);
+    return await Promise.all(
+      sortedProperties.map((property) => withImageUrls(ctx, property)),
+    );
   },
 });
 

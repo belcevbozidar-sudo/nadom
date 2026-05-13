@@ -21,6 +21,8 @@ import {
   Save,
   Home,
   ListChecks,
+  Upload,
+  GripVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -46,7 +48,6 @@ import {
   DEFAULT_PROPERTIES,
   type EditableProperty,
 } from "../_lib/properties-data.ts";
-import { SERVICE_ICON_MAP } from "../_lib/content-icons.ts";
 import {
   deleteProperty,
   deleteService,
@@ -69,11 +70,21 @@ const HAS_CONVEX_BACKEND = Boolean(import.meta.env.VITE_CONVEX_URL);
 type AdminSubmission = StoredSubmission;
 type AdminService = StoredService;
 type AdminProperty = StoredProperty;
+type ImageBearing = { imageUrl?: string; galleryUrls?: string[] };
 
 type LockoutData = {
   attempts: number;
   lockedUntil: number | null;
 };
+
+function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 function getLockoutData(): LockoutData {
   try {
@@ -905,15 +916,19 @@ function ServicesAdminPanelContent({
   services,
   onSave,
   onDelete,
+  onUploadImage,
 }: {
   services: AdminService[];
   onSave: (service: EditableService & { id?: string }) => Promise<void> | void;
   onDelete: (serviceId: string) => Promise<void> | void;
+  onUploadImage: (file: File) => Promise<string>;
 }) {
   const [activeCategory, setActiveCategory] =
     useState<ServiceCategory>("general");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<EditableService>(emptyService);
+  const [servicePreview, setServicePreview] = useState("");
+  const [isUploadingServiceImage, setIsUploadingServiceImage] = useState(false);
 
   const categoryServices = services.filter(
     (service) => service.category === activeCategory,
@@ -921,6 +936,7 @@ function ServicesAdminPanelContent({
 
   const startNew = () => {
     setSelectedId(null);
+    setServicePreview("");
     setForm({
       ...emptyService,
       category: activeCategory,
@@ -930,6 +946,7 @@ function ServicesAdminPanelContent({
 
   const selectService = (service: AdminService) => {
     setSelectedId(service.id);
+    setServicePreview((service as AdminService & ImageBearing).imageUrl ?? service.image ?? "");
     setForm({
       category: service.category,
       title: service.title,
@@ -940,6 +957,22 @@ function ServicesAdminPanelContent({
       order: service.order,
       isVisible: service.isVisible,
     });
+  };
+
+  const handleServiceImage = async (file?: File) => {
+    if (!file) return;
+    setIsUploadingServiceImage(true);
+    try {
+      const previewUrl = URL.createObjectURL(file);
+      const image = await onUploadImage(file);
+      setServicePreview(previewUrl);
+      setForm((current) => ({ ...current, image }));
+      toast.success("Снимката е качена.");
+    } catch {
+      toast.error("Не успяхме да качим снимката.");
+    } finally {
+      setIsUploadingServiceImage(false);
+    }
   };
 
   const handleSaveService = async () => {
@@ -1052,41 +1085,39 @@ function ServicesAdminPanelContent({
             placeholder="Описание"
             className="bg-white/10 border-white/20 text-white min-h-28"
           />
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Input
-              value={form.image ?? ""}
-              onChange={(e) => setForm({ ...form, image: e.target.value })}
-              placeholder="URL на снимка"
-              className="bg-white/10 border-white/20 text-white"
+          <label className="block rounded-xl border border-dashed border-white/20 bg-white/[0.04] p-4 cursor-pointer hover:bg-white/[0.07] transition-colors">
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => {
+                void handleServiceImage(event.target.files?.[0]);
+                event.target.value = "";
+              }}
             />
-            <Input
-              value={form.href ?? ""}
-              onChange={(e) => setForm({ ...form, href: e.target.value })}
-              placeholder="Линк"
-              className="bg-white/10 border-white/20 text-white"
-            />
-          </div>
-          <div className="grid sm:grid-cols-3 gap-3">
-            <select
-              value={form.icon}
-              onChange={(e) => setForm({ ...form, icon: e.target.value })}
-              className="h-10 rounded-lg bg-white/10 border border-white/15 text-white px-3 text-sm"
-            >
-              {Object.keys(SERVICE_ICON_MAP).map((icon) => (
-                <option key={icon} value={icon}>
-                  {icon}
-                </option>
-              ))}
-            </select>
-            <Input
-              type="number"
-              value={form.order}
-              onChange={(e) =>
-                setForm({ ...form, order: Number(e.target.value) || 1 })
-              }
-              placeholder="Ред"
-              className="bg-white/10 border-white/20 text-white"
-            />
+            <div className="flex items-center gap-3">
+              {servicePreview ? (
+                <img
+                  src={servicePreview}
+                  alt="Преглед на снимка"
+                  className="h-16 w-20 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="h-16 w-20 rounded-lg bg-white/10 flex items-center justify-center">
+                  <Upload className="size-5 text-white/50" />
+                </div>
+              )}
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  {isUploadingServiceImage ? "Качване..." : "Избери снимка"}
+                </p>
+                <p className="text-xs text-white/45">
+                  Снимката се избира директно от устройството.
+                </p>
+              </div>
+            </div>
+          </label>
+          <div className="grid sm:grid-cols-1 gap-3">
             <label className="flex items-center gap-2 text-sm text-white/70 px-2">
               <Checkbox
                 checked={form.isVisible}
@@ -1127,6 +1158,7 @@ function LocalServicesAdminPanel() {
       services={services}
       onSave={(service) => saveService(service)}
       onDelete={(serviceId) => deleteService(serviceId)}
+      onUploadImage={(file) => fileToDataUrl(file)}
     />
   );
 }
@@ -1139,6 +1171,7 @@ function ConvexServicesAdminPanel() {
   const updateService = useMutation(api.services.update);
   const removeService = useMutation(api.services.remove);
   const seedDefaults = useMutation(api.services.seedDefaults);
+  const generateUploadUrl = useMutation(api.media.generateUploadUrl);
 
   if (services === undefined) {
     return <Skeleton className="h-80 w-full bg-white/10" />;
@@ -1189,6 +1222,20 @@ function ConvexServicesAdminPanel() {
             serviceId: serviceId as Id<"services">,
           });
         }}
+        onUploadImage={async (file) => {
+          const uploadUrl = await generateUploadUrl({
+            adminPassword: ADMIN_PASSWORD,
+          });
+          const response = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          const { storageId } = (await response.json()) as {
+            storageId: string;
+          };
+          return storageId;
+        }}
       />
     </div>
   );
@@ -1226,24 +1273,35 @@ function PropertiesAdminPanelContent({
   properties,
   onSave,
   onDelete,
+  onUploadImage,
 }: {
   properties: AdminProperty[];
   onSave: (property: EditableProperty & { id?: string }) => Promise<void> | void;
   onDelete: (propertyId: string) => Promise<void> | void;
+  onUploadImage: (file: File) => Promise<string>;
 }) {
   const sortedProperties = [...properties].sort((a, b) => a.order - b.order);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [form, setForm] = useState<EditableProperty>(emptyProperty);
-  const [galleryText, setGalleryText] = useState("");
+  const [galleryPreviews, setGalleryPreviews] = useState<string[]>([]);
+  const [dragImageIndex, setDragImageIndex] = useState<number | null>(null);
+  const [isUploadingPropertyImages, setIsUploadingPropertyImages] =
+    useState(false);
 
   const startNew = () => {
     const nextOrder = properties.length + 1;
     setSelectedId(null);
     setForm({ ...emptyProperty, order: nextOrder });
-    setGalleryText("");
+    setGalleryPreviews([]);
   };
 
   const selectProperty = (property: AdminProperty) => {
+    const propertyImages = property.gallery.length
+      ? property.gallery
+      : [property.image].filter(Boolean);
+    const previewImages =
+      (property as AdminProperty & ImageBearing).galleryUrls ??
+      propertyImages;
     setSelectedId(property.id);
     setForm({
       slug: property.slug,
@@ -1258,19 +1316,70 @@ function PropertiesAdminPanelContent({
       phone: property.phone,
       description: property.description,
       image: property.image,
-      gallery: property.gallery,
+      gallery: propertyImages,
       order: property.order,
       isVisible: property.isVisible,
     });
-    setGalleryText(property.gallery.join("\n"));
+    setGalleryPreviews(previewImages);
+  };
+
+  const handlePropertyImages = async (files?: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setIsUploadingPropertyImages(true);
+    try {
+      const uploadedImages: string[] = [];
+      const previewImages: string[] = [];
+      for (const file of Array.from(files)) {
+        uploadedImages.push(await onUploadImage(file));
+        previewImages.push(URL.createObjectURL(file));
+      }
+      const nextGallery = [...form.gallery, ...uploadedImages];
+      const nextPreviews = [...galleryPreviews, ...previewImages];
+      setGalleryPreviews(nextPreviews);
+      setForm((current) => ({
+        ...current,
+        image: nextGallery[0] ?? "",
+        gallery: nextGallery,
+      }));
+      toast.success("Снимките са качени.");
+    } catch {
+      toast.error("Не успяхме да качим снимките.");
+    } finally {
+      setIsUploadingPropertyImages(false);
+    }
+  };
+
+  const movePropertyImage = (fromIndex: number, toIndex: number) => {
+    const nextGallery = [...form.gallery];
+    const nextPreviews = [...galleryPreviews];
+    const [galleryItem] = nextGallery.splice(fromIndex, 1);
+    const [previewItem] = nextPreviews.splice(fromIndex, 1);
+    nextGallery.splice(toIndex, 0, galleryItem);
+    nextPreviews.splice(toIndex, 0, previewItem);
+    setGalleryPreviews(nextPreviews);
+    setForm((current) => ({
+      ...current,
+      image: nextGallery[0] ?? "",
+      gallery: nextGallery,
+    }));
+  };
+
+  const removePropertyImage = (imageIndex: number) => {
+    const nextGallery = form.gallery.filter((_, index) => index !== imageIndex);
+    const nextPreviews = galleryPreviews.filter(
+      (_, index) => index !== imageIndex,
+    );
+    setGalleryPreviews(nextPreviews);
+    setForm((current) => ({
+      ...current,
+      image: nextGallery[0] ?? "",
+      gallery: nextGallery,
+    }));
   };
 
   const handleSaveProperty = async () => {
     try {
-      const gallery = galleryText
-        .split("\n")
-        .map((item) => item.trim())
-        .filter(Boolean);
+      const gallery = form.gallery.filter(Boolean);
       const payload = {
         ...form,
         id: selectedId ?? undefined,
@@ -1283,8 +1392,8 @@ function PropertiesAdminPanelContent({
         price: form.price.trim(),
         phone: form.phone.trim(),
         description: form.description.trim(),
-        image: form.image.trim(),
-        gallery: gallery.length > 0 ? gallery : [form.image.trim()],
+        image: gallery[0] ?? "",
+        gallery,
       };
 
       await onSave(payload);
@@ -1338,7 +1447,10 @@ function PropertiesAdminPanelContent({
                   }`}
                 >
                   <img
-                    src={property.image}
+                    src={
+                      (property as AdminProperty & ImageBearing).imageUrl ??
+                      property.image
+                    }
                     alt={property.title}
                     className="w-16 h-14 rounded-lg object-cover shrink-0"
                   />
@@ -1367,13 +1479,81 @@ function PropertiesAdminPanelContent({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <div className="grid sm:grid-cols-2 gap-3">
-            <Input
-              value={form.slug}
-              onChange={(e) => setForm({ ...form, slug: e.target.value })}
-              placeholder="URL име, напр. 3-staen-centar"
-              className="bg-white/10 border-white/20 text-white"
+          <label className="block rounded-xl border border-dashed border-white/20 bg-white/[0.04] p-4 cursor-pointer hover:bg-white/[0.07] transition-colors">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(event) => {
+                void handlePropertyImages(event.target.files);
+                event.target.value = "";
+              }}
             />
+            <div className="flex items-center gap-3">
+              <div className="h-14 w-14 rounded-lg bg-white/10 flex items-center justify-center">
+                <Upload className="size-5 text-white/50" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  {isUploadingPropertyImages
+                    ? "Качване..."
+                    : "Избери снимки от устройството"}
+                </p>
+                <p className="text-xs text-white/45">
+                  Първата снимка е основна. Подреди ги с влачене.
+                </p>
+              </div>
+            </div>
+          </label>
+
+          {galleryPreviews.length > 0 && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {galleryPreviews.map((preview, index) => (
+                <div
+                  key={`${preview}-${index}`}
+                  draggable
+                  onDragStart={() => setDragImageIndex(index)}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => {
+                    if (dragImageIndex === null || dragImageIndex === index) {
+                      return;
+                    }
+                    movePropertyImage(dragImageIndex, index);
+                    setDragImageIndex(null);
+                  }}
+                  className="flex gap-3 rounded-xl border border-white/10 bg-white/5 p-2"
+                >
+                  <button
+                    type="button"
+                    className="w-8 rounded-lg bg-white/10 flex items-center justify-center text-white/50 cursor-grab"
+                    title="Премести"
+                  >
+                    <GripVertical className="size-4" />
+                  </button>
+                  <img
+                    src={preview}
+                    alt={`Снимка ${index + 1}`}
+                    className="h-20 w-24 rounded-lg object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-white">
+                      {index === 0 ? "Основна снимка" : `Снимка ${index + 1}`}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => removePropertyImage(index)}
+                      className="mt-2 text-xs text-red-300 hover:text-red-200"
+                    >
+                      Премахни
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="grid sm:grid-cols-1 gap-3">
             <Input
               value={form.type}
               onChange={(e) => setForm({ ...form, type: e.target.value })}
@@ -1393,16 +1573,7 @@ function PropertiesAdminPanelContent({
             placeholder="Локация"
             className="bg-white/10 border-white/20 text-white"
           />
-          <div className="grid sm:grid-cols-4 gap-3">
-            <Input
-              type="number"
-              value={form.area}
-              onChange={(e) =>
-                setForm({ ...form, area: Number(e.target.value) || 0 })
-              }
-              placeholder="Площ"
-              className="bg-white/10 border-white/20 text-white"
-            />
+          <div className="grid sm:grid-cols-3 gap-3">
             <Input
               value={form.rooms}
               onChange={(e) => setForm({ ...form, rooms: e.target.value })}
@@ -1425,7 +1596,7 @@ function PropertiesAdminPanelContent({
               className="bg-white/10 border-white/20 text-white"
             />
           </div>
-          <div className="grid sm:grid-cols-3 gap-3">
+          <div className="grid sm:grid-cols-2 gap-3">
             <Input
               value={form.price}
               onChange={(e) => setForm({ ...form, price: e.target.value })}
@@ -1438,28 +1609,7 @@ function PropertiesAdminPanelContent({
               placeholder="Телефон"
               className="bg-white/10 border-white/20 text-white"
             />
-            <Input
-              type="number"
-              value={form.order}
-              onChange={(e) =>
-                setForm({ ...form, order: Number(e.target.value) || 1 })
-              }
-              placeholder="Ред"
-              className="bg-white/10 border-white/20 text-white"
-            />
           </div>
-          <Input
-            value={form.image}
-            onChange={(e) => setForm({ ...form, image: e.target.value })}
-            placeholder="Основна снимка URL"
-            className="bg-white/10 border-white/20 text-white"
-          />
-          <Textarea
-            value={galleryText}
-            onChange={(e) => setGalleryText(e.target.value)}
-            placeholder="Галерия - по един URL на ред"
-            className="bg-white/10 border-white/20 text-white min-h-24"
-          />
           <Textarea
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -1505,6 +1655,7 @@ function LocalPropertiesAdminPanel() {
       properties={properties}
       onSave={(property) => saveProperty(property)}
       onDelete={(propertyId) => deleteProperty(propertyId)}
+      onUploadImage={(file) => fileToDataUrl(file)}
     />
   );
 }
@@ -1517,6 +1668,7 @@ function ConvexPropertiesAdminPanel() {
   const updateProperty = useMutation(api.properties.update);
   const removeProperty = useMutation(api.properties.remove);
   const seedDefaults = useMutation(api.properties.seedDefaults);
+  const generateUploadUrl = useMutation(api.media.generateUploadUrl);
 
   if (properties === undefined) {
     return <Skeleton className="h-80 w-full bg-white/10" />;
@@ -1565,6 +1717,20 @@ function ConvexPropertiesAdminPanel() {
             adminPassword: ADMIN_PASSWORD,
             propertyId: propertyId as Id<"properties">,
           });
+        }}
+        onUploadImage={async (file) => {
+          const uploadUrl = await generateUploadUrl({
+            adminPassword: ADMIN_PASSWORD,
+          });
+          const response = await fetch(uploadUrl, {
+            method: "POST",
+            headers: { "Content-Type": file.type },
+            body: file,
+          });
+          const { storageId } = (await response.json()) as {
+            storageId: string;
+          };
+          return storageId;
         }}
       />
     </div>

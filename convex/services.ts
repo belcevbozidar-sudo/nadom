@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 
 const ADMIN_PASSWORD = "1122334455";
 
@@ -23,15 +24,27 @@ const serviceFields = {
   isVisible: v.boolean(),
 };
 
+async function getImageUrl(ctx: any, value?: string) {
+  if (!value) return undefined;
+  if (/^(https?:|data:)/.test(value)) return value;
+  return (await ctx.storage.getUrl(value as Id<"_storage">)) ?? value;
+}
+
 export const listPublic = query({
   args: {},
   handler: async (ctx) => {
     const services = await ctx.db.query("services").collect();
-    return services
+    const visibleServices = services
       .filter((service) => service.isVisible)
       .sort(
         (a, b) => a.category.localeCompare(b.category) || a.order - b.order,
       );
+    return await Promise.all(
+      visibleServices.map(async (service) => ({
+        ...service,
+        imageUrl: await getImageUrl(ctx, service.image),
+      })),
+    );
   },
 });
 
@@ -40,8 +53,14 @@ export const listAdmin = query({
   handler: async (ctx, args) => {
     assertAdmin(args.adminPassword);
     const services = await ctx.db.query("services").collect();
-    return services.sort(
+    const sortedServices = services.sort(
       (a, b) => a.category.localeCompare(b.category) || a.order - b.order,
+    );
+    return await Promise.all(
+      sortedServices.map(async (service) => ({
+        ...service,
+        imageUrl: await getImageUrl(ctx, service.image),
+      })),
     );
   },
 });

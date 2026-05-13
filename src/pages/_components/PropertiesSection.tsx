@@ -91,7 +91,7 @@ function PropertiesSectionContent({
                   <Card className="pt-0 overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-300 border-white/20 bg-white/95 backdrop-blur-sm shadow-lg">
                     <div className="relative overflow-hidden">
                       <motion.img
-                        src={property.image}
+                        src={(property as EditableProperty & { imageUrl?: string }).imageUrl ?? property.image}
                         alt={property.type}
                         className="w-full h-52 object-cover"
                         whileHover={{ scale: 1.1 }}
